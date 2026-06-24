@@ -236,8 +236,8 @@
 
   var homes = [
     { badge: 'Home Design 01', name: 'LAVENDER', price: 'From $499,000', img: 'uploads/LAVENDER.png', imgPhone: 'uploads/LAVENDER2-PHONE.png', plan: 'uploads/PLAN1.png', planRot: 90, specs: ['2 bedrooms', '1 bathroom', 'Open-plan living', 'Private outdoor area'] },
-    { badge: 'Home Design 02', name: 'PEPPERMINT', price: 'Price coming soon', img: 'uploads/PEPPERMINT.png', imgPhone: 'uploads/PEPPERMINT-PHONE.png', plan: 'uploads/PLAN2.png', planRot: 0, specs: ['2 bedrooms', '2 bathrooms', 'Larger living area', 'Premium finishes'] },
-    { badge: 'Home Design 03', name: 'ROSEMARY', price: 'Price coming soon', img: 'uploads/ROSEMARY.jpeg', imgPhone: 'uploads/ROSEMARY-PHONE.png', plan: 'uploads/PLAN3.png', planRot: 0, specs: ['3 bedrooms', '2 bathrooms', 'Designed for extra space', 'Ideal for guests or hobbies'] }
+    { badge: 'Home Design 02', name: 'PEPPERMINT', price: 'Price coming soon', img: 'uploads/ROSEMARY.jpeg', imgPhone: 'uploads/ROSEMARY-PHONE.png', plan: 'uploads/PLAN2.png', planRot: 0, specs: ['2 bedrooms', '2 bathrooms', 'Larger living area', 'Premium finishes'] },
+    { badge: 'Home Design 03', name: 'ROSEMARY', price: 'Price coming soon', img: 'uploads/PEPPERMINT.png ', imgPhone: 'uploads/PEPPERMINT-PHONE.png', plan: 'uploads/PLAN3.png', planRot: 0, specs: ['3 bedrooms', '2 bathrooms', 'Designed for extra space', 'Ideal for guests or hobbies'] }
   ];
 
   var awards = [
@@ -270,6 +270,7 @@
     activeNearby: false,   // nearby amenities info card/sheet open
     homeIdx: 0,
     homePaused: false,
+    homeExpanded: false,   // mobile: home card showing full specs (vs collapsed name+price)
     planModalOpen: false,
     faqOpen: 0
   };
@@ -365,6 +366,20 @@
       return;
     }
 
+    // under-50 dead-end (branches off the first question)
+    if (step === 'under50') {
+      host.innerHTML =
+        '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:clamp(9px,1.4vw,14px);">' +
+        '<button data-act="back" aria-label="Back" style="display:inline-flex; align-items:center; gap:5px; background:none; border:0; cursor:pointer; color:rgba(247,243,234,.6); font-size:13px; padding:0;"><span style="font-size:15px; line-height:1;">&larr;</span> Back</button><span></span></div>' +
+        '<div style="text-align:center; padding:clamp(6px,2vw,16px) 0;">' +
+        '<div style="width:54px; height:54px; border-radius:50%; background:rgba(247,243,234,.1); border:1.5px solid rgba(247,243,234,.28); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:#F7F3EA; font-family:\'Libre Baskerville\',serif; font-size:18px;">50+</div>' +
+        '<p style="margin:0 0 10px; font-family:\'Libre Baskerville\',serif; font-size:clamp(20px,2.6vw,26px); line-height:1.25; color:#fff;">Sorry, our community is 50 years+</p>' +
+        '<p style="margin:0; color:rgba(247,243,234,.72); font-size:15px; line-height:1.55;">Please come back later.</p></div>';
+      var bku = host.querySelector('[data-act="back"]');
+      if (bku) bku.onclick = function () { setQuiz({ quizStep: 0 }); };
+      return;
+    }
+
     if (step === 0 || step === 1) {
       var def = quizSteps[step];
       var html = quizHeaderHtml(step) +
@@ -381,7 +396,13 @@
       Array.prototype.forEach.call(host.querySelectorAll('[data-opt]'), function (btn) {
         btn.onmouseover = function () { btn.style.borderColor = '#FF6600'; btn.style.background = 'rgba(247,243,234,.14)'; btn.style.transform = 'translateY(-1px)'; btn.style.boxShadow = '0 8px 22px -14px rgba(255,102,0,.6)'; };
         btn.onmouseout = function () { var sel = state[def.key] === btn.getAttribute('data-opt'); btn.style.borderColor = sel ? '#FF6600' : 'rgba(247,243,234,.2)'; btn.style.background = 'rgba(247,243,234,.08)'; btn.style.transform = 'none'; btn.style.boxShadow = 'none'; };
-        btn.onclick = function () { var p = { quizStep: step + 1 }; p[def.key] = btn.getAttribute('data-opt'); setQuiz(p); };
+        btn.onclick = function () {
+          var optKey = btn.getAttribute('data-opt');
+          var p = {}; p[def.key] = optKey;
+          // Under-50 isn't eligible — branch to a polite dead-end instead of advancing.
+          p.quizStep = (step === 0 && optKey === 'under50') ? 'under50' : step + 1;
+          setQuiz(p);
+        };
       });
       return;
     }
@@ -392,7 +413,10 @@
       '<p style="margin:0 0 clamp(10px,1.4vw,15px); font-family:\'Libre Baskerville\',serif; font-size:clamp(19px,2.4vw,25px); line-height:1.2; color:#fff; text-align:center;">Where can we reach you?</p>' +
       '<form id="ulr-quiz-form" style="display:grid; gap:9px;">' +
       quizSelectedZoneHtml() +
-      '<input class="ulr-input" name="name" placeholder="Full name" autocomplete="name" required style="padding:11px 14px;">' +
+      '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' +
+      '<input class="ulr-input" name="first_name" placeholder="First name" autocomplete="given-name" required style="padding:11px 14px; min-width:0;">' +
+      '<input class="ulr-input" name="last_name" placeholder="Last name" autocomplete="family-name" required style="padding:11px 14px; min-width:0;">' +
+      '</div>' +
       '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' +
       '<input class="ulr-input" name="email" type="email" placeholder="Email" autocomplete="email" required style="padding:11px 14px; min-width:0;">' +
       '<input class="ulr-input" name="phone" placeholder="Phone" autocomplete="tel" style="padding:11px 14px; min-width:0;">' +
@@ -420,8 +444,9 @@
     });
     host.querySelector('#ulr-quiz-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      var nameEl = e.target.querySelector('input[name="name"]');
-      state.quizName = nameEl ? nameEl.value.trim() : '';
+      var firstEl = e.target.querySelector('input[name="first_name"]');
+      var lastEl = e.target.querySelector('input[name="last_name"]');
+      state.quizName = ((firstEl ? firstEl.value.trim() : '') + ' ' + (lastEl ? lastEl.value.trim() : '')).trim();
       setQuiz({ quizStep: 'done' });
     });
   }
@@ -502,7 +527,7 @@
     $('ulr-rev-progress').textContent = ('0' + (idx + 1)) + ' / 0' + n;
   }
   function arrowBtn(dir, glyph, left, right) {
-    return '<button data-arrow="' + dir + '" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' testimonial" style="position:absolute; ' + (left != null ? 'left:' + left + ';' : '') + (right != null ? 'right:' + right + ';' : '') + ' top:50%; transform:translateY(-50%); z-index:3; width:46px; height:46px; border-radius:50%; border:1px solid rgba(247,243,234,.25); background:rgba(29,37,33,.45); color:#F7F3EA; cursor:pointer; font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); transition:background .25s,border-color .25s;">' + glyph + '</button>';
+    return '<button data-arrow="' + dir + '" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' testimonial" style="position:absolute; ' + (left != null ? 'left:' + left + ';' : '') + (right != null ? 'right:' + right + ';' : '') + ' top:50%; transform:translateY(-50%); z-index:3; width:46px; height:46px; min-width:46px; min-height:46px; border-radius:50%; border:1px solid rgba(247,243,234,.25); background:rgba(29,37,33,.45); color:#F7F3EA; cursor:pointer; font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); transition:background .25s,border-color .25s;">' + glyph + '</button>';
   }
   function revGo(i) {
     var n = reviews.length; i = ((i % n) + n) % n;
@@ -675,33 +700,53 @@
         '<span style="flex:0 0 auto; width:6px; height:6px; border-radius:50%; background:#FF6600;"></span>' + esc(t) + '</div>';
     });
     var panel = $('ulr-home-panel');
-    panel.style.cssText = 'flex:1 1 360px; max-width:480px; background:rgba(247,243,234,.95); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(247,243,234,.5); border-radius:22px; box-shadow:0 40px 80px -42px rgba(0,0,0,.6); padding:clamp(24px,3vw,36px); animation:panelIn .7s cubic-bezier(.22,.61,.36,1) both;';
+    var mob = state.isMobile;
+    var expanded = !mob || state.homeExpanded;   // desktop always shows the full specs
+    var sameHome = panel.dataset.hidx === String(hIdx);
+    panel.dataset.hidx = String(hIdx);
+    panel.style.cssText = 'flex:1 1 360px; max-width:480px; background:rgba(247,243,234,.95); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(247,243,234,.5); border-radius:22px; box-shadow:0 40px 80px -42px rgba(0,0,0,.6); padding:clamp(24px,3vw,36px);';
+
+    // Button base + the two visual variants. Desktop keeps the original pairing
+    // (View details = filled green, Request brochure = outline). Mobile swaps them.
+    var btnBase = 'flex:1 1 auto; cursor:pointer; font-weight:600; font-size:14.5px; padding:14px 22px; border-radius:12px; transition:background .25s,color .25s;';
+    var fillBtn = btnBase + 'border:0; background:#3E5A50; color:#F7F3EA;';
+    var outlineBtn = btnBase + 'border:1.5px solid #3E5A50; background:transparent; color:#3E5A50;';
+    var detailsFilled = !mob;                     // desktop filled, mobile outline
+    var detailsLabel = (mob && expanded) ? 'Hide details' : 'View details';
+
     panel.innerHTML =
       '<span style="display:inline-block; background:#2C4139; color:#F7F3EA; font-size:11.5px; font-weight:600; letter-spacing:.06em; padding:6px 12px; border-radius:999px; margin-bottom:16px;">' + esc(h.badge) + '</span>' +
       '<h3 style="margin:0 0 6px; font-family:\'Libre Baskerville\',serif; font-weight:400; font-size:clamp(28px,3.6vw,38px); color:#2C4139; line-height:1.04;">' + esc(h.name) + '</h3>' +
-      '<p style="margin:0 0 22px; color:#FF6600; font-weight:700; font-size:clamp(16px,2vw,19px);">' + esc(h.price) + '</p>' +
-      '<div style="display:grid; grid-template-columns:1fr 1fr; gap:11px 18px; margin-bottom:26px;">' + specsHtml + '</div>' +
+      '<p style="margin:0 0 ' + (expanded ? '22px' : '20px') + '; color:#FF6600; font-weight:700; font-size:clamp(16px,2vw,19px);">' + esc(h.price) + '</p>' +
+      (expanded ? '<div style="display:grid; grid-template-columns:1fr 1fr; gap:11px 18px; margin-bottom:26px;">' + specsHtml + '</div>' : '') +
       '<div style="display:flex; flex-wrap:wrap; gap:12px;">' +
-      '<button data-act="details" style="flex:1 1 auto; cursor:pointer; border:0; background:#3E5A50; color:#F7F3EA; font-weight:600; font-size:14.5px; padding:14px 22px; border-radius:12px; transition:background .25s;">View details</button>' +
-      '<button data-act="brochure" style="flex:1 1 auto; cursor:pointer; border:1.5px solid #3E5A50; background:transparent; color:#3E5A50; font-weight:600; font-size:14.5px; padding:14px 22px; border-radius:12px; transition:background .25s,color .25s;">Request brochure</button>' +
+      '<button data-act="details" style="' + (detailsFilled ? fillBtn : outlineBtn) + '">' + detailsLabel + '</button>' +
+      '<button data-act="brochure" style="' + (detailsFilled ? outlineBtn : fillBtn) + '">Request brochure</button>' +
       '</div>';
-    panel.style.animation = 'none'; void panel.offsetWidth; panel.style.animation = 'panelIn .7s cubic-bezier(.22,.61,.36,1) both';
+    // Replay the slide-in only when the home actually changes — not on a collapse/expand toggle.
+    if (!sameHome) { panel.style.animation = 'none'; void panel.offsetWidth; panel.style.animation = 'panelIn .7s cubic-bezier(.22,.61,.36,1) both'; }
 
     renderHomePlan(hIdx);
     if (state.planModalOpen) renderPlanModal(hIdx);
 
-    panel.querySelector('[data-act="details"]').onclick = goToQuizContact;
+    var dt = panel.querySelector('[data-act="details"]');
     var bro = panel.querySelector('[data-act="brochure"]');
-    bro.onmouseover = function () { bro.style.background = '#3E5A50'; bro.style.color = '#F7F3EA'; };
-    bro.onmouseout = function () { bro.style.background = 'transparent'; bro.style.color = '#3E5A50'; };
+    function hoverFill(btn) { btn.onmouseover = function () { btn.style.background = '#2C4139'; }; btn.onmouseout = function () { btn.style.background = '#3E5A50'; }; }
+    function hoverOutline(btn) { btn.onmouseover = function () { btn.style.background = '#3E5A50'; btn.style.color = '#F7F3EA'; }; btn.onmouseout = function () { btn.style.background = 'transparent'; btn.style.color = '#3E5A50'; }; }
+    (detailsFilled ? hoverFill : hoverOutline)(dt);
+    (detailsFilled ? hoverOutline : hoverFill)(bro);
+
+    if (mob) {
+      // Mobile: View details expands/collapses the card (stop auto-rotate so it doesn't yank away).
+      dt.onclick = function () { homeStopAuto(); setState({ homeExpanded: !state.homeExpanded }); };
+    } else {
+      dt.onclick = goToQuizContact;
+    }
     bro.onclick = function () {
       var name = h.name;
       if (state.brochureHomes.indexOf(name) === -1) state.brochureHomes.push(name);
       goToQuizContact();
     };
-    var dt = panel.querySelector('[data-act="details"]');
-    dt.onmouseover = function () { dt.style.background = '#2C4139'; };
-    dt.onmouseout = function () { dt.style.background = '#3E5A50'; };
 
     // selectors
     var sel = $('ulr-home-selectors'); sel.innerHTML = '';
@@ -718,7 +763,7 @@
   function homeGo(i) {
     var n = homes.length; i = ((i % n) + n) % n;
     if (i === state.homeIdx) return;
-    setState({ homeIdx: i }); homeRestartAuto();
+    setState({ homeIdx: i, homeExpanded: false }); homeRestartAuto();
   }
   function homeNext() { homeGo(state.homeIdx + 1); }
   function homePrev() { homeGo(state.homeIdx - 1); }
@@ -980,7 +1025,7 @@
       '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:' + (big ? '18px' : '16px') + ';">' +
       '<div><span style="display:inline-block; margin-bottom:10px; color:#FF6600; letter-spacing:.18em; text-transform:uppercase; font-size:11px; font-weight:700;">Residential area</span>' +
       '<h3 style="margin:0; font-family:\'Libre Baskerville\',serif; font-weight:400; font-size:' + (big ? '28px' : '24px') + '; line-height:1.15; color:#2C4139;">' + esc(zone.name) + '</h3></div>' +
-      '<button data-act="close" aria-label="Close zone panel" style="flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:1px solid #E4D9C0; background:#fff; color:#3E5A50; cursor:pointer; font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;">&times;</button>' +
+      '<button data-act="close" aria-label="Close zone panel" style="flex:0 0 auto; width:34px; height:34px; min-width:34px; min-height:34px; border-radius:50%; border:1px solid #E4D9C0; background:#fff; color:#3E5A50; cursor:pointer; font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;">&times;</button>' +
       '</div>' +
       '<p style="margin:0 0 ' + (big ? '22px' : '20px') + '; color:#5b6a62; font-size:' + (big ? '15.5px' : '14.5px') + '; line-height:1.55;">Interested in homes within this area? Add ' + esc(zone.name) + ' to your enquiry and the team will follow up with availability.</p>' +
       '<button data-act="add-zone" class="ulr-btn-primary" style="width:100%; font-size:' + (big ? '15.5px' : '14.5px') + '; padding:' + (big ? '15px' : '13px') + '; border-radius:12px;">' + (added ? 'Update enquiry with ' : 'Add ') + esc(zone.name) + (added ? '' : ' to enquiry') + '</button>' +
@@ -1049,7 +1094,7 @@
         '<span style="flex:0 0 auto; width:42px; height:42px; border-radius:50%; background:#FF6600; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 0 18px -2px rgba(255,102,0,.68);">' + amenitySvg(nearbyAmenity.icon, 22) + '</span>' +
         '<div style="min-width:0;"><span style="display:block; color:#FF6600; letter-spacing:.16em; text-transform:uppercase; font-size:10px; font-weight:800;">Nearby</span>' +
         '<h3 style="margin:3px 0 0; font-family:\'Libre Baskerville\',serif; font-weight:400; font-size:22px; line-height:1.1; color:#F7F3EA;">Amenities</h3></div></div>' +
-        '<button data-act="nearby-close" aria-label="Close nearby amenities" style="flex:0 0 auto; width:32px; height:32px; border-radius:50%; border:1px solid rgba(247,243,234,.18); background:rgba(247,243,234,.08); color:#F7F3EA; cursor:pointer; font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;">&times;</button></div>' +
+        '<button data-act="nearby-close" aria-label="Close nearby amenities" style="flex:0 0 auto; width:32px; height:32px; min-width:32px; min-height:32px; border-radius:50%; border:1px solid rgba(247,243,234,.18); background:rgba(247,243,234,.08); color:#F7F3EA; cursor:pointer; font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;">&times;</button></div>' +
         '<p style="margin:0 0 8px; color:rgba(247,243,234,.72); font-size:13.5px; line-height:1.45;">' + esc(nearbyAmenity.intro) + '</p>' +
         '<div style="display:grid; gap:0;">' + rows + '</div>';
     }
@@ -1523,9 +1568,17 @@
       var radius = 24 + (999 - 24) * es;
       shell.style.width = width + 'px';
       shell.style.height = height + 'px';
-      shell.style.top = top + 'px';
       shell.style.borderRadius = radius + 'px';
-      shell.style.boxShadow = '0 ' + (34 - 16 * es) + 'px ' + (80 - 36 * es) + 'px -' + (26 - 4 * es) + 'px rgba(29,37,33,' + (0.62 + 0.1 * es) + ')';
+      if (state.isMobile) {
+        // Phones: move the shell with a composited transform (no per-frame `top` layout) and
+        // keep a static shadow — avoids the paint/layout thrash that made the intro scroll stutter.
+        shell.style.top = startTop + 'px';
+        shell.style.transform = 'translateX(-50%) translateY(' + ((endTop - startTop) * es) + 'px)';
+      } else {
+        shell.style.top = top + 'px';
+        shell.style.transform = 'translateX(-50%)';
+        shell.style.boxShadow = '0 ' + (34 - 16 * es) + 'px ' + (80 - 36 * es) + 'px -' + (26 - 4 * es) + 'px rgba(29,37,33,' + (0.62 + 0.1 * es) + ')';
+      }
       if (quizPanel) {
         var qo = 1 - smoothstep(e, 0.16, 0.5);
         quizPanel.style.opacity = String(qo);
@@ -1600,9 +1653,18 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-quiz-contact]'), function (b) {
       b.onclick = function (e) {
         e.preventDefault();
+        e.stopPropagation();   // don't also trigger the whole-header click below
         goToQuizContact();
       };
     });
+    // The whole sticky header acts as a "back to the form" button (scrolls up to the intro/quiz).
+    var morphHeader = $('ulr-morph-header');
+    if (morphHeader) {
+      morphHeader.style.cursor = 'pointer';
+      morphHeader.setAttribute('role', 'button');
+      morphHeader.setAttribute('aria-label', 'Back to the form');
+      morphHeader.onclick = function () { scrollTo('ulr-intro'); };
+    }
     // home nav buttons
     $('ulr-home-prev').onclick = homePrev;
     $('ulr-home-next').onclick = homeNext;
