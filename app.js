@@ -122,9 +122,9 @@
   // JSON and paste it into mapMobileCfg.zones / .amenities below.
   // ============================================================
   function cloneMapData(d) { return JSON.parse(JSON.stringify(d)); }
-  var mapDesktopCfg = { img: 'uploads/masterplan-a83a34d8.jpg', size: { width: 4000, height: 2250 }, zones: zoneData, amenities: amenities, nearby: nearbyAmenity };
+  var mapDesktopCfg = { img: 'uploads/masterplan-a83a34d8.webp', size: { width: 4000, height: 2250 }, zones: zoneData, amenities: amenities, nearby: nearbyAmenity };
   var mapMobileCfg = {
-    img: 'uploads/plan-mobie.jpg',
+    img: 'uploads/plan-mobie.webp',
     size: { width: 4000, height: 4000 },
     zones: [
     {
@@ -235,9 +235,9 @@
   var benefits = ['No stamp duty', 'No entry or exit fees', 'Centrelink rent assistance eligible', 'Release equity from your family home', 'Lower weekly living costs', 'Downsize the house, upsize the life'];
 
   var homes = [
-    { badge: 'Home Design 01', name: 'LAVENDER', price: 'From $499,000', img: 'uploads/LAVENDER.png', imgPhone: 'uploads/LAVENDER2-PHONE.png', plan: 'uploads/PLAN1.png', planRot: 90, specs: ['2 bedrooms', '1 bathroom', 'Open-plan living', 'Private outdoor area'] },
-    { badge: 'Home Design 02', name: 'PEPPERMINT', price: 'Price coming soon', img: 'uploads/ROSEMARY.jpeg', imgPhone: 'uploads/ROSEMARY-PHONE.png', plan: 'uploads/PLAN2.png', planRot: 0, specs: ['2 bedrooms', '2 bathrooms', 'Larger living area', 'Premium finishes'] },
-    { badge: 'Home Design 03', name: 'ROSEMARY', price: 'Price coming soon', img: 'uploads/PEPPERMINT.png ', imgPhone: 'uploads/PEPPERMINT-PHONE.png', plan: 'uploads/PLAN3.png', planRot: 0, specs: ['3 bedrooms', '2 bathrooms', 'Designed for extra space', 'Ideal for guests or hobbies'] }
+    { badge: 'Home Design 01', name: 'LAVENDER', price: 'From $499,000', img: 'uploads/LAVENDER.webp', imgPhone: 'uploads/LAVENDER2-PHONE.webp', plan: 'uploads/PLAN1.webp', planRot: 90, specs: ['2 bedrooms', '1 bathroom', 'Open-plan living', 'Private outdoor area'] },
+    { badge: 'Home Design 02', name: 'PEPPERMINT', price: 'Price coming soon', img: 'uploads/ROSEMARY.webp', imgPhone: 'uploads/ROSEMARY-PHONE.webp', plan: 'uploads/PLAN2.webp', planRot: 0, specs: ['2 bedrooms', '2 bathrooms', 'Larger living area', 'Premium finishes'] },
+    { badge: 'Home Design 03', name: 'ROSEMARY', price: 'Price coming soon', img: 'uploads/PEPPERMINT.webp ', imgPhone: 'uploads/PEPPERMINT-PHONE.webp', plan: 'uploads/PLAN3.webp', planRot: 0, specs: ['3 bedrooms', '2 bathrooms', 'Designed for extra space', 'Ideal for guests or hobbies'] }
   ];
 
   var awards = [
@@ -1535,7 +1535,9 @@
     var scrolled = Math.min(Math.max(-root.getBoundingClientRect().top, 0), scrollable);
     var p = scrolled / scrollable;
     // Camera pan + scale run across the WHOLE section (clouds -> homes).
-    var camY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (1.80 * vh);
+    // Phones use a shorter track (255vh vs 280vh, see @media) to trim the empty sky — pan less so the homes still fills the frame.
+    var camFactor = state.isMobile ? 1.55 : 1.80;
+    var camY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (camFactor * vh);
     var scale = introInterp([0, 0.1, 0.5, 0.92, 1], [1.02, 1.03, 1.05, 1.04, 1.06], p);
     var track = $('ulr-intro-track'), scaleEl = $('ulr-intro-scale');
     if (track) track.style.transform = 'translateY(' + (-camY) + 'px)';

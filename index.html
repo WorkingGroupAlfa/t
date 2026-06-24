@@ -34,6 +34,13 @@
   .ulr-input:focus { border-color:#FF6600; }
   .ulr-btn-primary { cursor:pointer; border:0; background:#FF6600; color:#fff; font-weight:600; transition:background .25s, transform .25s; }
   .ulr-btn-primary:hover { background:#e65c00; }
+  /* Round icon/close buttons must stay perfect circles on every device. iOS Safari gives <button>
+     a native appearance and ignores explicit height in flexbox, which flattens them into ovals.
+     Reset the native look and derive the height from the (fixed) width via aspect-ratio. */
+  #ulr-plan-close, [data-act="close"], [data-act="nearby-close"], #ulr-home-prev, #ulr-home-next, [data-arrow] {
+    -webkit-appearance: none !important; appearance: none !important;
+    flex: 0 0 auto !important; height: auto !important; aspect-ratio: 1 !important;
+  }
   .ulr-plan-thumb { font-family:'Mulish',sans-serif; cursor:pointer; color:#F7F3EA; transition:transform .28s ease, border-color .28s ease, box-shadow .28s ease, background .28s ease; }
   .ulr-plan-thumb:hover { transform:translateY(-2px); border-color:rgba(255,102,0,.55) !important; box-shadow:0 26px 60px -34px rgba(255,102,0,.55), 0 20px 46px -34px rgba(0,0,0,.75); background:rgba(29,42,37,.52) !important; }
   .ulr-plan-thumb:focus-visible { outline:2px solid #FF6600; outline-offset:4px; }
@@ -62,6 +69,12 @@
     #ulr-morph-shell { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; will-change:transform !important; }
     /* fix the quiz panel height so the form doesn't re-layout every scroll frame (it fades out; overflow clips it) */
     #ulr-morph-quiz { height:clamp(380px,48svh,465px) !important; top:0 !important; bottom:auto !important; }
+    /* shorten the empty sky between clouds and homes (less scrolling on phones).
+       Coordinated with the camera factor in updateIntro(): homes top = track height - 120vh,
+       and the JS pan reaches (track height - 100)vh so the homes still fills the frame at the end. */
+    #ulr-intro { height:320vh !important; }
+    #ulr-intro-track { height:255vh !important; }
+    #ulr-intro-homes { top:135vh !important; }
 
     /* masterplan: wider square map; amenity markers → teardrop map pins (clean, high contrast) */
     #ulr-masterplan { padding-left:clamp(10px,3vw,16px) !important; padding-right:clamp(10px,3vw,16px) !important; }
@@ -165,8 +178,8 @@
     <div style="position:sticky; top:0; height:100vh; overflow:hidden; background:#9fb9d3;">
       <div id="ulr-intro-scale" style="position:absolute; inset:0; transform-origin:50% 50%; will-change:transform;">
         <div id="ulr-intro-track" style="position:absolute; left:0; top:0; width:100%; height:280vh; will-change:transform; background:linear-gradient(180deg, #88a6c8 0%, #92afd0 28%, #abc2df 44%, #c9d6ea 56%, #e3e8f7 66%, #e3e8f7 100%);">
-          <img src="uploads/clouds.jpg" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
-          <img src="uploads/homes.jpg" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
+          <img src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
+          <img id="ulr-intro-homes" src="uploads/homes.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
         </div>
       </div>
 
@@ -191,8 +204,7 @@
             <p style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">The lifestyle</p>
             <h2 style="margin:0 0 18px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(30px,5vw,52px); line-height:1.1;">Stage 1 Now Selling</h2>
             <p style="margin:0 0 14px; color:rgba(247,243,234,.95); font-size:clamp(17px,2.4vw,21px); line-height:1.5; font-weight:400;">Peaceful days by the water, shared spaces close by, and a home that feels easy to enjoy.</p>
-            <p style="margin:0 0 28px; color:rgba(247,243,234,.78); font-size:clamp(15px,2vw,17px); line-height:1.6; max-width:520px;">A limited number of homes are now available, with strong demand already building. Secure your place early and take advantage of today&rsquo;s pricing.</p>
-            <button data-scroll="ulr-homes" style="cursor:pointer; border:1.5px solid rgba(247,243,234,.6); background:rgba(247,243,234,.06); color:#F7F3EA; font-weight:600; font-size:15px; padding:14px 28px; border-radius:999px; backdrop-filter:blur(4px); transition:background .25s,border-color .25s,color .25s;" onmouseover="this.style.background='#F7F3EA';this.style.color='#2C4139';this.style.borderColor='#F7F3EA';" onmouseout="this.style.background='rgba(247,243,234,.06)';this.style.color='#F7F3EA';this.style.borderColor='rgba(247,243,234,.6)';">Explore the lifestyle</button>
+            <p style="margin:0; color:rgba(247,243,234,.78); font-size:clamp(15px,2vw,17px); line-height:1.6; max-width:520px;">A limited number of homes are now available, with strong demand already building. Secure your place early and take advantage of today&rsquo;s pricing.</p>
           </div>
         </div>
       </div>
@@ -226,10 +238,10 @@
   <section id="ulr-keyhole" data-screen-label="Ownership reveal" style="position:relative; height:250svh; background:#1d2a25;">
     <div id="kh-pin" style="position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden;">
     <div id="kh-stage" style="position:absolute; inset:0; overflow:hidden; background:#1d2a25; --kh-s:9;">
-      <img id="kh-ext" src="uploads/exterior21.png" alt="Exterior of a home at United Lifestyle Resort" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+      <img id="kh-ext" src="uploads/exterior21.webp" alt="Exterior of a home at United Lifestyle Resort" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
       <div id="kh-ext-scrim" style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(29,42,37,.5) 0%, rgba(29,42,37,.14) 32%, rgba(29,42,37,.5) 100%);"></div>
       <div id="kh-ring" style="display:none; position:absolute; inset:0; pointer-events:none; opacity:0; background:#FF6600; filter:blur(7px); -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc((var(--kh-s) + 1.8)*1vw) auto; mask-size:calc((var(--kh-s) + 1.8)*1vw) auto;"></div>
-      <img id="kh-int" src="uploads/interior-pc2.png" alt="Warm interior living space" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; will-change:opacity; -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc(var(--kh-s)*1vw) auto; mask-size:calc(var(--kh-s)*1vw) auto;">
+      <img id="kh-int" src="uploads/interior-pc2.webp" alt="Warm interior living space" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; will-change:opacity; -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc(var(--kh-s)*1vw) auto; mask-size:calc(var(--kh-s)*1vw) auto;">
       <div id="kh-int-scrim" style="position:absolute; inset:0; pointer-events:none; opacity:0; background:linear-gradient(0deg, rgba(29,42,37,.82) 0%, rgba(29,42,37,0) 46%);"></div>
       <div id="kh-cap-ext" style="position:absolute; left:0; right:0; top:13%; text-align:center; padding:0 24px; will-change:transform,opacity;">
         <p style="margin:0 0 12px; color:#FF6600; letter-spacing:.34em; text-transform:uppercase; font-size:12px; font-weight:700; text-shadow:0 1px 12px rgba(29,42,37,.6);">From the outside in</p>
@@ -252,7 +264,7 @@
     <div style="max-width:1080px; margin:0 auto;">
       <div data-reveal style="max-width:640px; margin:0 auto clamp(32px,4vw,46px); text-align:center;">
         <p style="margin:0 0 14px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">A smarter way to downsize</p>
-        <h2 style="margin:0 0 16px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,46px); line-height:1.12; color:#2C4139;">Own your home. Keep what&rsquo;s yours.</h2>
+        <h2 style="margin:0 0 16px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,46px); line-height:1.12; color:#2C4139;"> Your value to keep.</h2>
         <p style="margin:0; color:#5b6a62; font-size:clamp(15px,2vw,18px); line-height:1.5;">A smarter way to enjoy resort-style living, with homes from $499,000 and a model designed to help you keep more of what&rsquo;s yours.</p>
       </div>
 
@@ -364,7 +376,7 @@
         <div id="ulr-mapwrap" style="position:relative; border-radius:20px; overflow:hidden; box-shadow:0 30px 70px -34px rgba(29,37,33,.5); background:#2C4139; aspect-ratio:4000/2250; touch-action:pan-y;">
           <!-- stage = all map layers together (scaled as one to zoom in on mobile) -->
           <div id="ulr-map-stage" style="position:absolute; inset:0; transform-origin:50% 50%;">
-          <img id="ulr-map-img" src="uploads/masterplan-a83a34d8.jpg" loading="lazy" alt="Masterplan render of United Lifestyle Resort Traralgon" draggable="false" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; user-select:none; pointer-events:none;">
+          <img id="ulr-map-img" src="uploads/masterplan-a83a34d8.webp" loading="lazy" alt="Masterplan render of United Lifestyle Resort Traralgon" draggable="false" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; user-select:none; pointer-events:none;">
           <svg id="ulr-map-svg" viewBox="0 0 4000 2250" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; overflow:visible;"></svg>
           <div id="ulr-map-labels" style="position:absolute; inset:0; pointer-events:none;"></div>
           <!-- amenity markers (circular icon badges over the community buildings) -->
@@ -398,7 +410,7 @@
 
   <!-- ===================== FINAL ENQUIRY / FAQ ===================== -->
   <section id="ulr-faq" data-screen-label="FAQ" style="position:relative; min-height:100svh; background:#1d2a25; overflow:hidden; display:flex; align-items:center;">
-    <img data-zoom src="uploads/view.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(3px); transform:scale(1.06);">
+    <img data-zoom src="uploads/view.webp" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(3px); transform:scale(1.06);">
     <div style="position:absolute; inset:0; background:linear-gradient(118deg, rgba(20,30,26,.94) 0%, rgba(20,30,26,.8) 46%, rgba(20,30,26,.58) 100%);"></div>
     <div aria-hidden="true" style="position:absolute; left:64%; top:42%; width:min(720px,80vw); height:min(720px,80vw); border-radius:50%; background:radial-gradient(circle, rgba(255,102,0,.16), rgba(62,90,80,.12) 42%, transparent 68%); filter:blur(20px); animation:glowDrift 16s ease-in-out infinite; pointer-events:none;"></div>
     <img src="uploads/logo.png" alt="" aria-hidden="true" style="position:absolute; right:-40px; bottom:-50px; width:clamp(220px,28vw,360px); opacity:.04; pointer-events:none;">
@@ -441,7 +453,7 @@
         <div id="ulr-awards" class="ulr-developer-awards" data-reveal style="flex:1 1 300px; display:grid; grid-template-columns:repeat(2,minmax(130px,1fr)); gap:10px; align-content:center; align-self:center;"></div>
 
         <div class="ulr-developer-portrait" data-reveal style="position:relative; flex:0 1 clamp(220px,23vw,300px); min-height:clamp(250px,30vw,360px); border-radius:20px; overflow:hidden; background:linear-gradient(145deg, rgba(62,90,80,.58), rgba(29,37,33,.9)); border:1px solid rgba(247,243,234,.18); box-shadow:0 28px 70px -38px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,102,0,.06); display:flex; align-items:center; justify-content:center; align-self:stretch;">
-          <img src="uploads/Dean.jpg" alt="Dean Cook" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top;">
+          <img src="uploads/Dean.webp" alt="Dean Cook" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top;">
           <div aria-hidden="true" style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(29,37,33,.04), rgba(29,37,33,.2) 62%, rgba(29,37,33,.62));"></div>
           <div aria-hidden="true" style="position:absolute; inset:auto -18% -20% auto; width:72%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle, rgba(255,102,0,.18), rgba(255,102,0,0) 68%); filter:blur(10px);"></div>
           <img src="uploads/logo.png" alt="" aria-hidden="true" style="position:absolute; right:18px; bottom:18px; width:42px; opacity:.82; filter:drop-shadow(0 0 12px rgba(255,102,0,.32));">
