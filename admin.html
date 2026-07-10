@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Website Editor - United Lifestyle Resort</title>
+<link rel="icon" href="uploads/logo.png">
 <style>
   * { box-sizing: border-box; }
   :root { --ink:#1D2521; --green:#2C4139; --green2:#3E5A50; --cream:#F7F3EA; --line:#DED2B8; --orange:#FF6600; --muted:#68776e; --white:#fff; }
@@ -61,16 +62,8 @@
   .step strong { display:block; color:var(--green); margin-bottom:3px; }
   .step span { display:block; color:#68776e; font-size:14px; line-height:1.4; }
   .soft-note { margin:12px 0 0; color:#68776e; font-size:14px; line-height:1.45; }
-  .auth-gate { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; padding:24px; background:linear-gradient(145deg,#1D2521,#2C4139); color:var(--cream); }
-  .auth-gate.show { display:flex; }
-  .auth-card { width:min(420px,100%); background:#fffaf0; color:var(--ink); border:1px solid #eadfc8; border-radius:16px; padding:24px; box-shadow:0 28px 90px -34px rgba(0,0,0,.75); }
-  .auth-card img { width:52px; height:52px; object-fit:contain; margin-bottom:14px; }
-  .auth-card h1 { margin:0 0 8px; font-family:Georgia,serif; font-size:30px; line-height:1.1; font-weight:400; color:var(--green); }
-  .auth-card p { margin:0 0 18px; color:#68776e; line-height:1.45; }
-  .auth-card input { width:100%; border:1px solid #d9cdb5; border-radius:10px; background:#fffdf8; color:var(--ink); padding:13px 12px; font-size:17px; outline:none; }
-  .auth-card input:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(255,102,0,.12); }
-  .auth-actions { display:flex; gap:10px; align-items:center; margin-top:14px; }
-  .auth-error { min-height:19px; margin-top:10px; color:#8d2e1b; font-size:14px; }
+  .demo-note { margin:0 0 16px; padding:12px 14px; border:1px solid rgba(255,102,0,.3); border-radius:12px; background:rgba(255,102,0,.08); color:#5c4031; font-size:14px; line-height:1.45; }
+  .btn[disabled] { opacity:.62; cursor:not-allowed; }
   .preview { background:#17231f; display:flex; flex-direction:column; min-width:0; }
   .preview-bar { height:58px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 16px; color:var(--cream); border-bottom:1px solid rgba(247,243,234,.12); }
   .seg { display:flex; padding:4px; border-radius:999px; background:rgba(247,243,234,.08); border:1px solid rgba(247,243,234,.16); }
@@ -87,19 +80,6 @@
 </style>
 </head>
 <body>
-<div id="authGate" class="auth-gate" aria-hidden="true">
-  <form id="authForm" class="auth-card">
-    <img src="uploads/logo.png" alt="">
-    <h1>Website editor</h1>
-    <p>Enter the editor password to change website content.</p>
-    <input id="authPassword" type="password" autocomplete="current-password" placeholder="Password">
-    <div class="auth-actions">
-      <button class="btn orange" type="submit">Unlock editor</button>
-    </div>
-    <div id="authError" class="auth-error"></div>
-  </form>
-</div>
-
 <div class="shell">
   <aside class="nav">
     <div class="brand">
@@ -109,7 +89,6 @@
     <div id="nav"></div>
     <div class="nav-footer">
       <a class="pill" href="/" target="_blank">Open website</a>
-      <button class="pill" id="lockBtn" type="button">Lock editor</button>
     </div>
   </aside>
 
@@ -121,7 +100,7 @@
       </div>
     </div>
     <div class="actions">
-      <button class="btn orange" id="saveBtn">Save</button>
+      <button class="btn orange" id="saveBtn">Demo only</button>
       <button class="btn secondary" id="refreshBtn">Undo changes</button>
       <details class="backup-tools">
         <summary>Backup</summary>
@@ -184,29 +163,6 @@ const previewTargets = {
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const AUTH_KEY = 'ulr-admin-password';
-
-function getAuthPassword() {
-  return sessionStorage.getItem(AUTH_KEY) || '';
-}
-
-function setAuthPassword(value) {
-  if (value) sessionStorage.setItem(AUTH_KEY, value);
-  else sessionStorage.removeItem(AUTH_KEY);
-}
-
-function showAuth(message = '') {
-  $('authGate').classList.add('show');
-  $('authGate').setAttribute('aria-hidden', 'false');
-  $('authError').textContent = message;
-  setTimeout(() => $('authPassword').focus(), 30);
-}
-
-function hideAuth() {
-  $('authGate').classList.remove('show');
-  $('authGate').setAttribute('aria-hidden', 'true');
-  $('authError').textContent = '';
-}
 
 function get(path) {
   return path.split('.').reduce((obj, key) => obj && obj[key], content);
@@ -223,42 +179,34 @@ function set(path, value) {
   markDirty();
 }
 
-async function api(path, options) {
-  const auth = getAuthPassword();
-  const headers = { ...(options?.headers || {}) };
-  if (auth) headers['X-Admin-Password'] = auth;
-  const res = await fetch(path, { ...(options || {}), headers });
-  if (!res.ok) {
-    let body = {};
-    try { body = await res.json(); } catch (err) {}
-    const error = new Error(body.error || res.statusText);
-    error.status = res.status;
-    throw error;
-  }
+async function loadAll() {
+  content = await fetchJson('content.json?ts=' + Date.now());
+  const manifest = await fetchJson('media-manifest.json?ts=' + Date.now()).catch(() => ({ media: collectMedia(content) }));
+  media = manifest.media || collectMedia(content);
+  dirty = false;
+  render();
+  postPreview();
+  setStatus('Demo loaded. Changes are preview only.');
+}
+
+async function fetchJson(path) {
+  const res = await fetch(path, { cache: 'no-store' });
+  if (!res.ok) throw new Error(res.statusText);
   return res.json();
 }
 
-async function loadAll() {
-  try {
-    content = await api('/api/content');
-    media = (await api('/api/media')).media;
-    dirty = false;
-    hideAuth();
-    render();
-    postPreview();
-    setStatus('Everything is saved.');
-  } catch (err) {
-    if (err.status === 401) {
-      showAuth(err.message);
-      setStatus('Locked.');
-      return;
-    }
-    throw err;
+function collectMedia(value, found = new Map()) {
+  if (Array.isArray(value)) value.forEach(item => collectMedia(item, found));
+  else if (value && typeof value === 'object') Object.values(value).forEach(item => collectMedia(item, found));
+  else if (typeof value === 'string' && /^uploads\/.+\.(png|jpe?g|webp|svg)$/i.test(value)) {
+    const name = value.split('/').pop();
+    found.set(value, { name, path: value, bytes: 0, modified: null });
   }
+  return Array.from(found.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function setStatus(text) {
-  $('status').textContent = dirty ? text + ' Remember to click Save.' : text;
+  $('status').textContent = dirty ? text + ' Preview only.' : text;
 }
 
 function markDirty() {
@@ -366,11 +314,12 @@ function renderSection() {
 
 function dashboard() {
   return `<div class="card"><h2>How to edit the website</h2>
-    <p>It is simple: choose a section on the left, change the words or images, then click the orange Save button.</p>
+    <div class="demo-note"><strong>Demo mode.</strong> This page is for showing the editor only. Changes update the preview, but they are not published to the live website.</div>
+    <p>It is simple: choose a section on the left, change the words or images, and watch the preview on the right.</p>
     <div class="steps">
       <div class="step"><b>1</b><div><strong>Choose a section</strong><span>For example Homes, Reviews, or Questions.</span></div></div>
       <div class="step"><b>2</b><div><strong>Make your changes</strong><span>The preview on the right shows how the website will look.</span></div></div>
-      <div class="step"><b>3</b><div><strong>Save</strong><span>Until you click Save, you can still undo your changes.</span></div></div>
+      <div class="step"><b>3</b><div><strong>Show the idea</strong><span>This demo does not save changes. It is only for presentation.</span></div></div>
     </div>
   </div>
   <div class="card"><h2>What is on the website</h2>
@@ -385,7 +334,7 @@ function dashboard() {
     <button class="btn secondary" data-section-jump="homes">Edit homes</button>
     <button class="btn secondary" data-section-jump="images">Change main photos</button>
     <button class="btn secondary" data-section-jump="media">Open images</button>
-    <p class="soft-note">The Backup button is only for saving or restoring a copy before bigger changes.</p>
+    <p class="soft-note">Backup buttons are kept for demonstration. They do not publish changes.</p>
   </div>`;
 }
 
@@ -468,7 +417,7 @@ function images() {
 }
 
 function mediaLibrary() {
-  return `<div class="card"><h2>Add an image</h2><div class="upload"><input id="libraryUpload" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button class="btn orange" id="libraryUploadBtn">Upload</button></div><p class="soft-note">After uploading, you can choose the image in Homes or Main photos.</p></div>
+  return `<div class="card"><h2>Add an image</h2><div class="upload"><input id="libraryUpload" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button class="btn orange" id="libraryUploadBtn">Preview image</button></div><p class="soft-note">In demo mode, uploaded images are visible only in this browser tab.</p></div>
   <div class="card"><h2>All images</h2><div class="media-grid">${media.map(m => `<button title="${esc(m.name)}"><img src="${esc(m.path)}" alt=""><span>${esc(m.name)}</span></button>`).join('')}</div></div>`;
 }
 
@@ -524,19 +473,12 @@ function bindRemove(selector, listPath) {
 }
 
 async function uploadFile(file) {
-  const prepared = await prepareImageForUpload(file);
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(prepared.file);
-  });
-  setStatus('Uploading image...');
-  return api('/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName: prepared.fileName, dataUrl })
-  });
+  const path = URL.createObjectURL(file);
+  return {
+    ok: true,
+    path,
+    media: [{ name: file.name, path, bytes: file.size, modified: null }, ...media]
+  };
 }
 
 async function prepareImageForUpload(file) {
@@ -570,11 +512,9 @@ async function prepareImageForUpload(file) {
 }
 
 $('saveBtn').onclick = async () => {
-  setStatus('Saving...');
-  await api('/api/content', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(content) });
   dirty = false;
-  setStatus('Saved. The live website will update after Vercel finishes publishing.');
-  $('previewFrame').src = '/index.html?adminPreview=' + Date.now();
+  postPreview();
+  setStatus('Preview updated. Nothing was published.');
 };
 
 $('refreshBtn').onclick = () => {
@@ -597,27 +537,6 @@ $('importFile').onchange = async e => {
   render();
   postPreview();
   setStatus('Backup uploaded.');
-};
-$('authForm').onsubmit = async e => {
-  e.preventDefault();
-  const password = $('authPassword').value.trim();
-  if (!password) {
-    $('authError').textContent = 'Please enter the password.';
-    return;
-  }
-  setAuthPassword(password);
-  $('authError').textContent = 'Checking password...';
-  try {
-    await loadAll();
-    $('authPassword').value = '';
-  } catch (err) {
-    setAuthPassword('');
-    showAuth(err.message || 'The password was not accepted.');
-  }
-};
-$('lockBtn').onclick = () => {
-  setAuthPassword('');
-  showAuth('The editor is locked.');
 };
 $('desktopBtn').onclick = () => { $('previewFrame').classList.remove('mobile'); $('desktopBtn').classList.add('active'); $('mobileBtn').classList.remove('active'); };
 $('mobileBtn').onclick = () => { $('previewFrame').classList.add('mobile'); $('mobileBtn').classList.add('active'); $('desktopBtn').classList.remove('active'); };
