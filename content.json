@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "title": "United Lifestyle Resort Traralgon",
+    "description": "A new lifestyle community for over 50s in Traralgon, Victoria - resort-style living, thoughtful homes and a smarter ownership model."
+  },
+  "images": {
+    "logo": "uploads/logo.png",
+    "introClouds": "uploads/clouds.webp",
+    "introHomes": "uploads/homes.webp",
+    "keyholeExterior": "uploads/exterior21.webp",
+    "keyholeInterior": "uploads/interior-pc2.webp",
+    "masterplanDesktop": "uploads/masterplan-a83a34d8.webp",
+    "masterplanMobile": "uploads/plan-mobie.webp",
+    "faqBackground": "uploads/view.webp",
+    "developerPortrait": "uploads/Dean.webp"
+  },
+  "intro": {
+    "location": "Traralgon - Victoria",
+    "title": "United Lifestyle Resort",
+    "outroEyebrow": "The lifestyle",
+    "outroTitle": "Stage 1 Now Selling",
+    "outroLead": "Peaceful days by the water, shared spaces close by, and a home that feels easy to enjoy.",
+    "outroBody": "A limited number of homes are now available, with strong demand already building. Secure your place early and take advantage of today's pricing."
+  },
+  "phrases": [
+    "Homes from $499,000",
+    "Resort-style living in Traralgon",
+    "Heated pool, gym, cinema and social spaces",
+    "Own your home, keep what's yours",
+    "A lifestyle community for 50+"
+  ],
+  "reviewsSection": {
+    "eyebrow": "United Lifestyle Resorts",
+    "title": "What people say about us"
+  },
+  "reviews": [
+    {
+      "quote": "Moving here was one of the best decisions I've made - it truly feels like home.",
+      "name": "Lyn",
+      "role": "Moved from Melbourne",
+      "initials": "L",
+      "rating": 5
+    },
+    {
+      "quote": "A welcoming community with plenty to do, and real peace of mind.",
+      "name": "Carol & Ian",
+      "role": "New residents",
+      "initials": "CI",
+      "rating": 5
+    },
+    {
+      "quote": "Integrity, genuine care and lifetime friends who feel like family.",
+      "name": "Bendigo Village resident",
+      "role": "A trusted member for 12+ years",
+      "initials": "BV",
+      "rating": 5
+    }
+  ],
+  "keyhole": {
+    "exteriorEyebrow": "From the outside in",
+    "exteriorTitle": "A place to call your own",
+    "interiorEyebrow": "Step inside",
+    "interiorTitle": "Own your home\nKeep what's yours"
+  },
+  "ownershipSection": {
+    "eyebrow": "A smarter way to downsize",
+    "title": "Your value to keep",
+    "body": "A smarter way to enjoy resort-style living, with homes from $499,000 and a model designed to help you keep more of what's yours.",
+    "priceEyebrow": "Homes from",
+    "price": "$499,000",
+    "priceBody": "Two and three bedroom homes available across Stage 1.",
+    "tabLabels": [
+      "You own",
+      "We care",
+      "You keep"
+    ],
+    "cards": [
+      {
+        "title": "You own your home outright",
+        "body": "Purchased, professionally finished, and yours from day one. No body corporate. No retirement village contract."
+      },
+      {
+        "title": "We look after the land",
+        "body": "A weekly site fee covers facilities, gardens and common areas. Eligible residents can apply for Centrelink rent assistance."
+      },
+      {
+        "title": "You keep what's yours",
+        "body": "When the time comes to sell, the home is yours to sell. No exit fees on the home itself."
+      }
+    ],
+    "benefits": [
+      "No stamp duty",
+      "No entry or exit fees",
+      "Centrelink rent assistance eligible",
+      "Release equity from your family home",
+      "Lower weekly living costs",
+      "Downsize the house, upsize the life"
+    ]
+  },
+  "homesSection": {
+    "eyebrow": "Stage 1 homes",
+    "title": "Choose a home that suits your next chapter",
+    "body": "Explore three home options designed for comfort, ease and low-maintenance living.",
+    "homes": [
+      {
+        "badge": "Home Design 01",
+        "name": "LAVENDER",
+        "price": "From $499,000",
+        "imageDesktop": "uploads/LAVENDER.webp",
+        "imageMobile": "uploads/LAVENDER2-PHONE.webp",
+        "plan": "uploads/PLAN1.webp",
+        "planRot": 90,
+        "specs": [
+          "2 bedrooms",
+          "1 bathroom",
+          "Open-plan living",
+          "Private outdoor area"
+        ]
+      },
+      {
+        "badge": "Home Design 02",
+        "name": "PEPPERMINT",
+        "price": "Price coming soon",
+        "imageDesktop": "uploads/PEPPERMINT.webp",
+        "imageMobile": "uploads/PEPPERMINT-PHONE.webp",
+        "plan": "uploads/PLAN2.webp",
+        "planRot": 0,
+        "specs": [
+          "2 bedrooms",
+          "2 bathrooms",
+          "Larger living area",
+          "Premium finishes"
+        ]
+      },
+      {
+        "badge": "Home Design 03",
+        "name": "ROSEMARY",
+        "price": "Price coming soon",
+        "imageDesktop": "uploads/ROSEMARY.webp",
+        "imageMobile": "uploads/ROSEMARY-PHONE.webp",
+        "plan": "uploads/PLAN3.webp",
+        "planRot": 0,
+        "specs": [
+          "3 bedrooms",
+          "2 bathrooms",
+          "Designed for extra space",
+          "Ideal for guests or hobbies"
+        ]
+      }
+    ]
+  },
+  "masterplanSection": {
+    "eyebrow": "Explore the community",
+    "title": "The masterplan",
+    "body": "The community is arranged into four distinct residential zones. Select a zone to explore it and add your area of interest to an enquiry."
+  },
+  "faqSection": {
+    "eyebrow": "Good to know",
+    "title": "Frequently asked questions",
+    "body": "A few of the things people most often ask. Can't see yours? Just ask us.",
+    "cta": "Still have a question? Contact us"
+  },
+  "faq": [
+    {
+      "q": "Who can live at Traralgon?",
+      "a": "Our community is designed for over-50s looking for an easier, low-maintenance lifestyle. Whether you're downsizing, retiring, or simply ready for less upkeep and more living, you're welcome here."
+    },
+    {
+      "q": "How much do the homes cost?",
+      "a": "Homes in Stage 1 start from $499,000. Prices vary depending on the home design, layout and position within the community."
+    },
+    {
+      "q": "What does home ownership look like here?",
+      "a": "You own your home outright. It is purchased professionally finished and yours from day one, with no body corporate and no traditional retirement village contract."
+    },
+    {
+      "q": "What does the weekly site fee cover?",
+      "a": "The weekly site fee helps cover community facilities, gardens, landscaping and common area maintenance, so everyday living stays easy and well looked after."
+    },
+    {
+      "q": "Are there entry or exit fees?",
+      "a": "No. Unlike many traditional retirement village models, there are no entry or exit fees on the home itself."
+    },
+    {
+      "q": "What facilities are available in the community?",
+      "a": "Residents can enjoy a heated swimming pool, bowling and croquet greens, gym, private cinema, library, meeting rooms, hobby workshop, community kitchen, residents lounge and a year-round social calendar."
+    },
+    {
+      "q": "Are pets allowed?",
+      "a": "Pet policies can vary, but the community is designed to support a relaxed and welcoming lifestyle. Please contact the team for the latest information on pet suitability."
+    },
+    {
+      "q": "Can I book an inspection or ask about available lots?",
+      "a": "Yes. You can request a callback, book an inspection, or enquire about available homes and lots directly through the website."
+    }
+  ],
+  "developer": {
+    "eyebrow": "A message from the developer",
+    "quote": "\"We are creating a community where the next chapter feels easier, more connected and more enjoyable.\"",
+    "body": "United Lifestyle Resort Traralgon brings together thoughtfully designed homes, resort-style amenities and a smarter ownership model for over-50s. Behind the project is a long-term approach to property: creating places that feel considered, secure and easy to enjoy, not just on day one, but for years to come.",
+    "name": "Dean Cook",
+    "role": "Developer, United Lifestyle Resorts",
+    "awards": [
+      {
+        "tag": "Experience",
+        "title": "Over three decades across property and financial services"
+      },
+      {
+        "tag": "Development",
+        "title": "Two decades shaping major property outcomes"
+      },
+      {
+        "tag": "Responsibility",
+        "title": "Registered Responsible Manager under United PF's AFSL"
+      },
+      {
+        "tag": "Long-term thinking",
+        "title": "Built on trust, transparency and alignment"
+      }
+    ]
+  },
+  "footer": {
+    "body": "United Lifestyle Resorts creates over-50s communities designed around connection, comfort and ease. United Lifestyle Resort Traralgon brings together low-maintenance homes, resort-style amenities and shared spaces made for a simpler, more enjoyable next chapter.",
+    "visitTitle": "Visit us",
+    "address": "Stage 1 Display - Traralgon VIC 3844\nAddress details coming soon",
+    "contact": "1300 000 000\nhello@unitedlifestyle.com.au",
+    "moreTitle": "More",
+    "copyright": "(c) 2026 United Lifestyle Resorts. All rights reserved. Imagery and pricing indicative only."
+  }
+}

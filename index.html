@@ -178,8 +178,8 @@
     <div style="position:sticky; top:0; height:100vh; overflow:hidden; background:#9fb9d3;">
       <div id="ulr-intro-scale" style="position:absolute; inset:0; transform-origin:50% 50%; will-change:transform;">
         <div id="ulr-intro-track" style="position:absolute; left:0; top:0; width:100%; height:280vh; will-change:transform; background:linear-gradient(180deg, #88a6c8 0%, #92afd0 28%, #abc2df 44%, #c9d6ea 56%, #e3e8f7 66%, #e3e8f7 100%);">
-          <img src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
-          <img id="ulr-intro-homes" src="uploads/homes.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
+          <img data-cms-img="images.introClouds" src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
+          <img id="ulr-intro-homes" data-cms-img="images.introHomes" src="uploads/homes.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
         </div>
       </div>
 
@@ -190,8 +190,8 @@
             <div aria-hidden="true" style="position:absolute; left:50%; top:56%; width:clamp(240px,30vw,440px); height:clamp(170px,20vw,300px); transform:translate(-50%,-50%); background:radial-gradient(ellipse at center, rgba(255,150,55,0.5) 0%, rgba(255,190,110,0.32) 28%, rgba(255,244,222,0.16) 48%, rgba(255,150,55,0) 72%); filter:blur(24px); mix-blend-mode:screen; pointer-events:none;"></div>
             <img src="uploads/logo.png" alt="United Lifestyle Resort" class="ulr-logo-glow" style="position:relative; z-index:1; height:clamp(38px,4.2vw,56px); width:auto; display:block;">
           </div>
-          <div style="font-family:'Mulish',system-ui,sans-serif; font-size:clamp(11px,1vw,14px); font-weight:600; letter-spacing:0.3em; text-transform:uppercase; color:#fff; text-shadow:0 1px 14px rgba(30,40,55,0.45); margin-bottom:clamp(10px,1.4vw,16px);">Traralgon&nbsp;&nbsp;&middot;&nbsp;&nbsp;Victoria</div>
-          <div style="font-family:'Libre Baskerville',Georgia,serif; font-size:clamp(30px,4.6vw,60px); font-weight:400; letter-spacing:-0.015em; line-height:1.06; color:#fff; text-align:center; text-shadow:0 2px 30px rgba(30,40,55,0.4);">United Lifestyle Resort</div>
+          <div data-cms-text="intro.location" style="font-family:'Mulish',system-ui,sans-serif; font-size:clamp(11px,1vw,14px); font-weight:600; letter-spacing:0.3em; text-transform:uppercase; color:#fff; text-shadow:0 1px 14px rgba(30,40,55,0.45); margin-bottom:clamp(10px,1.4vw,16px);">Traralgon&nbsp;&nbsp;&middot;&nbsp;&nbsp;Victoria</div>
+          <div data-cms-text="intro.title" style="font-family:'Libre Baskerville',Georgia,serif; font-size:clamp(30px,4.6vw,60px); font-weight:400; letter-spacing:-0.015em; line-height:1.06; color:#fff; text-align:center; text-shadow:0 2px 30px rgba(30,40,55,0.4);">United Lifestyle Resort</div>
         </div>
 
       </div>
@@ -201,10 +201,10 @@
         <div style="position:absolute; inset:0; background:linear-gradient(0deg, rgba(29,37,33,.8) 0%, rgba(29,37,33,.14) 46%, rgba(29,37,33,0) 72%); pointer-events:none;"></div>
         <div style="position:relative; z-index:2; width:100%; max-width:1280px; margin:0 auto; padding:0 clamp(20px,5vw,48px) clamp(56px,8vw,90px);">
           <div style="max-width:600px;">
-            <p style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">The lifestyle</p>
-            <h2 style="margin:0 0 18px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(30px,5vw,52px); line-height:1.1;">Stage 1 Now Selling</h2>
-            <p style="margin:0 0 14px; color:rgba(247,243,234,.95); font-size:clamp(17px,2.4vw,21px); line-height:1.5; font-weight:400;">Peaceful days by the water, shared spaces close by, and a home that feels easy to enjoy.</p>
-            <p style="margin:0; color:rgba(247,243,234,.78); font-size:clamp(15px,2vw,17px); line-height:1.6; max-width:520px;">A limited number of homes are now available, with strong demand already building. Secure your place early and take advantage of today&rsquo;s pricing.</p>
+            <p data-cms-text="intro.outroEyebrow" style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">The lifestyle</p>
+            <h2 data-cms-text="intro.outroTitle" style="margin:0 0 18px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(30px,5vw,52px); line-height:1.1;">Stage 1 Now Selling</h2>
+            <p data-cms-text="intro.outroLead" style="margin:0 0 14px; color:rgba(247,243,234,.95); font-size:clamp(17px,2.4vw,21px); line-height:1.5; font-weight:400;">Peaceful days by the water, shared spaces close by, and a home that feels easy to enjoy.</p>
+            <p data-cms-text="intro.outroBody" style="margin:0; color:rgba(247,243,234,.78); font-size:clamp(15px,2vw,17px); line-height:1.6; max-width:520px;">A limited number of homes are now available, with strong demand already building. Secure your place early and take advantage of today&rsquo;s pricing.</p>
           </div>
         </div>
       </div>
@@ -220,8 +220,8 @@
     <div style="position:absolute; top:-120px; right:-80px; width:360px; height:360px; border-radius:50%; background:radial-gradient(circle, rgba(62,90,80,.6), transparent 70%); pointer-events:none;"></div>
     <div style="max-width:1180px; margin:0 auto; position:relative;">
       <div style="max-width:680px; margin:0 auto; text-align:center;">
-        <p data-reveal style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">United Lifestyle Resorts</p>
-        <h2 data-reveal style="margin:0 0 56px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(27px,4.4vw,44px); line-height:1.2;">What people say about us</h2>
+        <p data-reveal data-cms-text="reviewsSection.eyebrow" style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">United Lifestyle Resorts</p>
+        <h2 data-reveal data-cms-text="reviewsSection.title" style="margin:0 0 56px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(27px,4.4vw,44px); line-height:1.2;">What people say about us</h2>
       </div>
       <!-- carousel stage -->
       <div id="ulr-rev-stage" data-reveal style="position:relative; min-height:360px; display:flex; align-items:center; justify-content:center;"></div>
@@ -238,18 +238,18 @@
   <section id="ulr-keyhole" data-screen-label="Ownership reveal" style="position:relative; height:250svh; background:#1d2a25;">
     <div id="kh-pin" style="position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden;">
     <div id="kh-stage" style="position:absolute; inset:0; overflow:hidden; background:#1d2a25; --kh-s:9;">
-      <img id="kh-ext" src="uploads/exterior21.webp" alt="Exterior of a home at United Lifestyle Resort" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+      <img id="kh-ext" data-cms-img="images.keyholeExterior" src="uploads/exterior21.webp" alt="Exterior of a home at United Lifestyle Resort" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
       <div id="kh-ext-scrim" style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(29,42,37,.5) 0%, rgba(29,42,37,.14) 32%, rgba(29,42,37,.5) 100%);"></div>
       <div id="kh-ring" style="display:none; position:absolute; inset:0; pointer-events:none; opacity:0; background:#FF6600; filter:blur(7px); -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc((var(--kh-s) + 1.8)*1vw) auto; mask-size:calc((var(--kh-s) + 1.8)*1vw) auto;"></div>
-      <img id="kh-int" src="uploads/interior-pc2.webp" alt="Warm interior living space" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; will-change:opacity; -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc(var(--kh-s)*1vw) auto; mask-size:calc(var(--kh-s)*1vw) auto;">
+      <img id="kh-int" data-cms-img="images.keyholeInterior" src="uploads/interior-pc2.webp" alt="Warm interior living space" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; will-change:opacity; -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc(var(--kh-s)*1vw) auto; mask-size:calc(var(--kh-s)*1vw) auto;">
       <div id="kh-int-scrim" style="position:absolute; inset:0; pointer-events:none; opacity:0; background:linear-gradient(0deg, rgba(29,42,37,.82) 0%, rgba(29,42,37,0) 46%);"></div>
       <div id="kh-cap-ext" style="position:absolute; left:0; right:0; top:13%; text-align:center; padding:0 24px; will-change:transform,opacity;">
-        <p style="margin:0 0 12px; color:#FF6600; letter-spacing:.34em; text-transform:uppercase; font-size:12px; font-weight:700; text-shadow:0 1px 12px rgba(29,42,37,.6);">From the outside in</p>
-        <h2 style="margin:0; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(28px,5vw,52px); line-height:1.12; text-shadow:0 2px 30px rgba(29,42,37,.55);">A place to call your own</h2>
+        <p data-cms-text="keyhole.exteriorEyebrow" style="margin:0 0 12px; color:#FF6600; letter-spacing:.34em; text-transform:uppercase; font-size:12px; font-weight:700; text-shadow:0 1px 12px rgba(29,42,37,.6);">From the outside in</p>
+        <h2 data-cms-text="keyhole.exteriorTitle" style="margin:0; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(28px,5vw,52px); line-height:1.12; text-shadow:0 2px 30px rgba(29,42,37,.55);">A place to call your own</h2>
       </div>
       <div id="kh-cap-int" style="position:absolute; left:0; right:0; bottom:13%; text-align:center; padding:0 24px; opacity:0; will-change:opacity;">
-        <p style="margin:0 0 12px; color:#FF6600; letter-spacing:.34em; text-transform:uppercase; font-size:12px; font-weight:700;">Step inside</p>
-        <h2 style="margin:0; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(28px,5vw,52px); line-height:1.1; text-shadow:0 2px 30px rgba(29,42,37,.55);">Own your home<br>Keep what's yours</h2>
+        <p data-cms-text="keyhole.interiorEyebrow" style="margin:0 0 12px; color:#FF6600; letter-spacing:.34em; text-transform:uppercase; font-size:12px; font-weight:700;">Step inside</p>
+        <h2 data-cms-text="keyhole.interiorTitle" style="margin:0; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(28px,5vw,52px); line-height:1.1; text-shadow:0 2px 30px rgba(29,42,37,.55);">Own your home<br>Keep what's yours</h2>
       </div>
       <div id="kh-hint" style="position:absolute; left:0; right:0; bottom:5%; text-align:center; opacity:.85; will-change:opacity;">
         <p style="margin:0 0 8px; color:rgba(247,243,234,.85); letter-spacing:.34em; text-transform:uppercase; font-size:11px; font-weight:600;">Keep scrolling</p>
@@ -263,9 +263,9 @@
   <section data-screen-label="Ownership" style="background:#F7F3EA; padding:clamp(54px,7vw,86px) clamp(20px,5vw,48px);">
     <div style="max-width:1080px; margin:0 auto;">
       <div data-reveal style="max-width:640px; margin:0 auto clamp(32px,4vw,46px); text-align:center;">
-        <p style="margin:0 0 14px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">A smarter way to downsize</p>
-        <h2 style="margin:0 0 16px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,46px); line-height:1.12; color:#2C4139;"> Your value to keep</h2>
-        <p style="margin:0; color:#5b6a62; font-size:clamp(15px,2vw,18px); line-height:1.5;">A smarter way to enjoy resort-style living, with homes from $499,000 and a model designed to help you keep more of what&rsquo;s yours.</p>
+        <p data-cms-text="ownershipSection.eyebrow" style="margin:0 0 14px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">A smarter way to downsize</p>
+        <h2 data-cms-text="ownershipSection.title" style="margin:0 0 16px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,46px); line-height:1.12; color:#2C4139;"> Your value to keep</h2>
+        <p data-cms-text="ownershipSection.body" style="margin:0; color:#5b6a62; font-size:clamp(15px,2vw,18px); line-height:1.5;">A smarter way to enjoy resort-style living, with homes from $499,000 and a model designed to help you keep more of what&rsquo;s yours.</p>
       </div>
 
       <div data-reveal style="position:relative; background:#fff; border:1px solid #E4D9C0; border-radius:24px; box-shadow:0 34px 80px -44px rgba(44,65,57,.4); padding:clamp(26px,4vw,46px); overflow:hidden;">
@@ -273,9 +273,9 @@
         <div style="position:relative; display:flex; flex-wrap:wrap; gap:clamp(26px,4vw,54px);">
           <!-- LEFT -->
           <div style="flex:1 1 280px;">
-            <p style="margin:0 0 10px; color:#9b8a63; letter-spacing:.16em; text-transform:uppercase; font-size:12px; font-weight:700;">Homes from</p>
-            <p style="margin:0 0 12px; font-family:'Libre Baskerville',serif; font-size:clamp(44px,7vw,64px); line-height:.96; color:#2C4139; animation:priceIn .9s cubic-bezier(.22,.61,.36,1) both;">$499,000</p>
-            <p style="margin:0 0 26px; color:#5b6a62; font-size:15px; line-height:1.5; max-width:300px;">Two and three bedroom homes available across Stage 1.</p>
+            <p data-cms-text="ownershipSection.priceEyebrow" style="margin:0 0 10px; color:#9b8a63; letter-spacing:.16em; text-transform:uppercase; font-size:12px; font-weight:700;">Homes from</p>
+            <p data-cms-text="ownershipSection.price" style="margin:0 0 12px; font-family:'Libre Baskerville',serif; font-size:clamp(44px,7vw,64px); line-height:.96; color:#2C4139; animation:priceIn .9s cubic-bezier(.22,.61,.36,1) both;">$499,000</p>
+            <p data-cms-text="ownershipSection.priceBody" style="margin:0 0 26px; color:#5b6a62; font-size:15px; line-height:1.5; max-width:300px;">Two and three bedroom homes available across Stage 1.</p>
             <div id="ulr-own-chips" style="display:flex; flex-direction:column; gap:11px;"></div>
           </div>
           <!-- RIGHT -->
@@ -310,9 +310,9 @@
 
     <div style="position:relative; z-index:5; width:100%; max-width:1280px; margin:0 auto; padding:clamp(26px,5vw,56px) clamp(20px,5vw,52px); display:flex; flex-direction:column;">
       <div data-reveal style="max-width:560px; margin-top:clamp(34px,6vh,72px);">
-        <p style="margin:0 0 14px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">Stage 1 homes</p>
-        <h2 style="margin:0 0 14px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,48px); line-height:1.1; color:#fff; text-shadow:0 2px 30px rgba(29,42,37,.5);">Choose a home that suits your next chapter</h2>
-        <p style="margin:0; color:rgba(247,243,234,.85); font-size:clamp(15px,2vw,17px); line-height:1.5; max-width:440px;">Explore three home options designed for comfort, ease and low-maintenance living.</p>
+        <p data-cms-text="homesSection.eyebrow" style="margin:0 0 14px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">Stage 1 homes</p>
+        <h2 data-cms-text="homesSection.title" style="margin:0 0 14px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,48px); line-height:1.1; color:#fff; text-shadow:0 2px 30px rgba(29,42,37,.5);">Choose a home that suits your next chapter</h2>
+        <p data-cms-text="homesSection.body" style="margin:0; color:rgba(247,243,234,.85); font-size:clamp(15px,2vw,17px); line-height:1.5; max-width:440px;">Explore three home options designed for comfort, ease and low-maintenance living.</p>
       </div>
 
       <div style="flex:1; min-height:24px;"></div>
@@ -366,9 +366,9 @@
   <section id="ulr-masterplan" data-screen-label="Masterplan" style="background:#F7F3EA; padding:clamp(64px,9vw,100px) clamp(20px,5vw,48px) clamp(70px,9vw,110px);">
     <div style="max-width:1280px; margin:0 auto;">
       <div style="max-width:680px; margin:0 0 30px;">
-        <p data-reveal style="margin:0 0 14px; color:#3E5A50; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">Explore the community</p>
-        <h2 data-reveal style="margin:0 0 12px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,46px); line-height:1.12; color:#2C4139;">The masterplan</h2>
-        <p data-reveal style="margin:0; color:#5b6a62; font-size:clamp(15px,2vw,18px); line-height:1.55;">The community is arranged into four distinct residential zones. Select a zone to explore it and add your area of interest to an enquiry.</p>
+        <p data-reveal data-cms-text="masterplanSection.eyebrow" style="margin:0 0 14px; color:#3E5A50; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">Explore the community</p>
+        <h2 data-reveal data-cms-text="masterplanSection.title" style="margin:0 0 12px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(28px,4.4vw,46px); line-height:1.12; color:#2C4139;">The masterplan</h2>
+        <p data-reveal data-cms-text="masterplanSection.body" style="margin:0; color:#5b6a62; font-size:clamp(15px,2vw,18px); line-height:1.55;">The community is arranged into four distinct residential zones. Select a zone to explore it and add your area of interest to an enquiry.</p>
       </div>
 
       <div data-reveal style="position:relative;">
@@ -410,16 +410,16 @@
 
   <!-- ===================== FINAL ENQUIRY / FAQ ===================== -->
   <section id="ulr-faq" data-screen-label="FAQ" style="position:relative; min-height:100svh; background:#1d2a25; overflow:hidden; display:flex; align-items:center;">
-    <img data-zoom src="uploads/view.webp" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(3px); transform:scale(1.06);">
+    <img data-zoom data-cms-img="images.faqBackground" src="uploads/view.webp" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(3px); transform:scale(1.06);">
     <div style="position:absolute; inset:0; background:linear-gradient(118deg, rgba(20,30,26,.94) 0%, rgba(20,30,26,.8) 46%, rgba(20,30,26,.58) 100%);"></div>
     <div aria-hidden="true" style="position:absolute; left:64%; top:42%; width:min(720px,80vw); height:min(720px,80vw); border-radius:50%; background:radial-gradient(circle, rgba(255,102,0,.16), rgba(62,90,80,.12) 42%, transparent 68%); filter:blur(20px); animation:glowDrift 16s ease-in-out infinite; pointer-events:none;"></div>
     <img src="uploads/logo.png" alt="" aria-hidden="true" style="position:absolute; right:-40px; bottom:-50px; width:clamp(220px,28vw,360px); opacity:.04; pointer-events:none;">
 
     <div style="position:relative; z-index:5; width:100%; max-width:1240px; margin:0 auto; padding:clamp(64px,9vh,108px) clamp(20px,5vw,52px); display:flex; flex-wrap:wrap; gap:clamp(34px,5vw,72px); align-items:flex-start;">
       <div data-reveal style="flex:1 1 320px; max-width:440px;">
-        <p style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">Good to know</p>
-        <h2 style="margin:0 0 18px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(30px,4.6vw,50px); line-height:1.08; text-shadow:0 2px 30px rgba(20,30,26,.5);">Frequently asked questions</h2>
-        <p style="margin:0 0 32px; color:rgba(247,243,234,.82); font-size:clamp(15px,2vw,18px); line-height:1.6; max-width:380px;">A few of the things people most often ask. Can&rsquo;t see yours? Just ask us.</p>
+        <p data-cms-text="faqSection.eyebrow" style="margin:0 0 16px; color:#FF6600; letter-spacing:.3em; text-transform:uppercase; font-size:12px; font-weight:700;">Good to know</p>
+        <h2 data-cms-text="faqSection.title" style="margin:0 0 18px; font-family:'Libre Baskerville',serif; color:#fff; font-weight:400; font-size:clamp(30px,4.6vw,50px); line-height:1.08; text-shadow:0 2px 30px rgba(20,30,26,.5);">Frequently asked questions</h2>
+        <p data-cms-text="faqSection.body" style="margin:0 0 32px; color:rgba(247,243,234,.82); font-size:clamp(15px,2vw,18px); line-height:1.6; max-width:380px;">A few of the things people most often ask. Can&rsquo;t see yours? Just ask us.</p>
         <div style="max-width:230px;">
           <span id="ulr-faq-progress" style="display:block; margin-bottom:10px; color:rgba(247,243,234,.6); font-size:12px; letter-spacing:.18em; font-variant-numeric:tabular-nums;"></span>
           <div style="height:2px; background:rgba(247,243,234,.2); border-radius:2px; overflow:hidden;">
@@ -438,14 +438,14 @@
     <div style="max-width:1180px; margin:0 auto;">
       <div class="ulr-developer-layout" style="display:flex; flex-wrap:wrap; align-items:stretch; gap:clamp(24px,3.4vw,42px);">
         <div class="ulr-developer-copy" data-reveal style="flex:1.45 1 420px; min-width:0; align-self:center;">
-          <p style="margin:0 0 9px; color:#FF6600; letter-spacing:.26em; text-transform:uppercase; font-size:11px; font-weight:700;">A message from the developer</p>
-          <p style="margin:0 0 12px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(17px,2.2vw,22px); line-height:1.34; color:#fff; max-width:620px;">&ldquo;We are creating a community where the next chapter feels easier, more connected and more enjoyable.&rdquo;</p>
-          <p style="margin:0 0 14px; color:rgba(247,243,234,.65); font-size:14px; line-height:1.55; max-width:620px;">United Lifestyle Resort Traralgon brings together thoughtfully designed homes, resort-style amenities and a smarter ownership model for over-50s. Behind the project is a long-term approach to property: creating places that feel considered, secure and easy to enjoy, not just on day one, but for years to come.</p>
+          <p data-cms-text="developer.eyebrow" style="margin:0 0 9px; color:#FF6600; letter-spacing:.26em; text-transform:uppercase; font-size:11px; font-weight:700;">A message from the developer</p>
+          <p data-cms-text="developer.quote" style="margin:0 0 12px; font-family:'Libre Baskerville',serif; font-weight:400; font-size:clamp(17px,2.2vw,22px); line-height:1.34; color:#fff; max-width:620px;">&ldquo;We are creating a community where the next chapter feels easier, more connected and more enjoyable.&rdquo;</p>
+          <p data-cms-text="developer.body" style="margin:0 0 14px; color:rgba(247,243,234,.65); font-size:14px; line-height:1.55; max-width:620px;">United Lifestyle Resort Traralgon brings together thoughtfully designed homes, resort-style amenities and a smarter ownership model for over-50s. Behind the project is a long-term approach to property: creating places that feel considered, secure and easy to enjoy, not just on day one, but for years to come.</p>
           <div class="ulr-developer-signature--desktop" style="display:flex; align-items:center; gap:11px;">
             <span style="width:3px; height:30px; background:#FF6600; border-radius:2px;"></span>
             <div>
-              <p style="margin:0; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">Dean Cook</p>
-              <p style="margin:1px 0 0; color:rgba(247,243,234,.55); font-size:12.5px;">Developer, United Lifestyle Resorts</p>
+              <p data-cms-text="developer.name" style="margin:0; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">Dean Cook</p>
+              <p data-cms-text="developer.role" style="margin:1px 0 0; color:rgba(247,243,234,.55); font-size:12.5px;">Developer, United Lifestyle Resorts</p>
             </div>
           </div>
         </div>
@@ -453,7 +453,7 @@
         <div id="ulr-awards" class="ulr-developer-awards" data-reveal style="flex:1 1 300px; display:grid; grid-template-columns:repeat(2,minmax(130px,1fr)); gap:10px; align-content:center; align-self:center;"></div>
 
         <div class="ulr-developer-portrait" data-reveal style="position:relative; flex:0 1 clamp(220px,23vw,300px); min-height:clamp(250px,30vw,360px); border-radius:20px; overflow:hidden; background:linear-gradient(145deg, rgba(62,90,80,.58), rgba(29,37,33,.9)); border:1px solid rgba(247,243,234,.18); box-shadow:0 28px 70px -38px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,102,0,.06); display:flex; align-items:center; justify-content:center; align-self:stretch;">
-          <img src="uploads/Dean.webp" alt="Dean Cook" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top;">
+          <img data-cms-img="images.developerPortrait" src="uploads/Dean.webp" alt="Dean Cook" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top;">
           <div aria-hidden="true" style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(29,37,33,.04), rgba(29,37,33,.2) 62%, rgba(29,37,33,.62));"></div>
           <div aria-hidden="true" style="position:absolute; inset:auto -18% -20% auto; width:72%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle, rgba(255,102,0,.18), rgba(255,102,0,0) 68%); filter:blur(10px);"></div>
           <img src="uploads/logo.png" alt="" aria-hidden="true" style="position:absolute; right:18px; bottom:18px; width:42px; opacity:.82; filter:drop-shadow(0 0 12px rgba(255,102,0,.32));">
@@ -461,8 +461,8 @@
         <div class="ulr-developer-signature--mobile" data-reveal style="display:none; order:-1; width:100%; align-items:center; justify-content:center; gap:11px; margin-top:-8px; text-align:left;">
           <span style="width:3px; height:30px; background:#FF6600; border-radius:2px;"></span>
           <div>
-            <p style="margin:0; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">Dean Cook</p>
-            <p style="margin:1px 0 0; color:rgba(247,243,234,.62); font-size:12.5px;">Developer, United Lifestyle Resorts</p>
+            <p data-cms-text="developer.name" style="margin:0; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">Dean Cook</p>
+            <p data-cms-text="developer.role" style="margin:1px 0 0; color:rgba(247,243,234,.62); font-size:12.5px;">Developer, United Lifestyle Resorts</p>
           </div>
         </div>
       </div>
@@ -475,15 +475,15 @@
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:36px; padding-top:clamp(28px,3vw,36px); padding-bottom:40px; border-top:1px solid rgba(247,243,234,.12); border-bottom:1px solid rgba(247,243,234,.12);">
         <div style="max-width:380px;">
           <img src="uploads/logo.png" alt="" style="height:42px; margin-bottom:20px;">
-          <p style="margin:0; color:rgba(247,243,234,.72); font-size:14.5px; line-height:1.65;">United Lifestyle Resorts creates over-50s communities designed around connection, comfort and ease. United Lifestyle Resort Traralgon brings together low-maintenance homes, resort-style amenities and shared spaces made for a simpler, more enjoyable next chapter.</p>
+          <p data-cms-text="footer.body" style="margin:0; color:rgba(247,243,234,.72); font-size:14.5px; line-height:1.65;">United Lifestyle Resorts creates over-50s communities designed around connection, comfort and ease. United Lifestyle Resort Traralgon brings together low-maintenance homes, resort-style amenities and shared spaces made for a simpler, more enjoyable next chapter.</p>
         </div>
         <div>
-          <p style="margin:0 0 16px; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">Visit us</p>
-          <p style="margin:0 0 8px; color:rgba(247,243,234,.7); font-size:14px; line-height:1.5;">Stage 1 Display &mdash; Traralgon VIC 3844<br>Address details coming soon</p>
-          <p style="margin:14px 0 0; color:rgba(247,243,234,.7); font-size:14px;">1300 000 000<br>hello@unitedlifestyle.com.au</p>
+          <p data-cms-text="footer.visitTitle" style="margin:0 0 16px; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">Visit us</p>
+          <p data-cms-text="footer.address" style="margin:0 0 8px; color:rgba(247,243,234,.7); font-size:14px; line-height:1.5;">Stage 1 Display &mdash; Traralgon VIC 3844<br>Address details coming soon</p>
+          <p data-cms-text="footer.contact" style="margin:14px 0 0; color:rgba(247,243,234,.7); font-size:14px;">1300 000 000<br>hello@unitedlifestyle.com.au</p>
         </div>
         <div>
-          <p style="margin:0 0 16px; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">More</p>
+          <p data-cms-text="footer.moreTitle" style="margin:0 0 16px; color:#fff; font-family:'Libre Baskerville',serif; font-size:16px;">More</p>
           <div style="display:grid; gap:9px;">
             <a href="#ulr-homes" style="color:rgba(247,243,234,.7); font-size:14px; text-decoration:none;" onmouseover="this.style.color='#FF6600'" onmouseout="this.style.color='rgba(247,243,234,.7)'">Home designs</a>
             <a href="#ulr-faq" style="color:rgba(247,243,234,.7); font-size:14px; text-decoration:none;" onmouseover="this.style.color='#FF6600'" onmouseout="this.style.color='rgba(247,243,234,.7)'">Frequently asked questions</a>
@@ -492,7 +492,7 @@
           </div>
         </div>
       </div>
-      <p style="margin:28px 0 0; color:rgba(247,243,234,.4); font-size:12.5px;">&copy; 2026 United Lifestyle Resorts. All rights reserved. Imagery and pricing indicative only.</p>
+      <p data-cms-text="footer.copyright" style="margin:28px 0 0; color:rgba(247,243,234,.4); font-size:12.5px;">&copy; 2026 United Lifestyle Resorts. All rights reserved. Imagery and pricing indicative only.</p>
     </div>
   </footer>
 

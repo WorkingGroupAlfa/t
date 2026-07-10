@@ -13,6 +13,81 @@
   }
   function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  var cmsContent = null;
+
+  function getCms(path, fallback) {
+    if (!cmsContent || !path) return fallback;
+    var cur = cmsContent;
+    path.split('.').forEach(function (part) {
+      if (cur && Object.prototype.hasOwnProperty.call(cur, part)) cur = cur[part];
+      else cur = undefined;
+    });
+    return cur == null ? fallback : cur;
+  }
+
+  function applyCmsStaticContent() {
+    if (!cmsContent) return;
+    if (cmsContent.meta) {
+      if (cmsContent.meta.title) document.title = cmsContent.meta.title;
+      var desc = document.querySelector('meta[name="description"]');
+      if (desc && cmsContent.meta.description) desc.setAttribute('content', cmsContent.meta.description);
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cms-text]'), function (node) {
+      var value = getCms(node.getAttribute('data-cms-text'), null);
+      if (value == null) return;
+      node.innerHTML = esc(value).replace(/\n/g, '<br>');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cms-img]'), function (node) {
+      var value = getCms(node.getAttribute('data-cms-img'), null);
+      if (value) node.setAttribute('src', value);
+    });
+    var logo = getCms('images.logo', null);
+    if (logo) {
+      Array.prototype.forEach.call(document.querySelectorAll('img[src="uploads/logo.png"], link[rel="icon"]'), function (node) {
+        node.setAttribute(node.tagName.toLowerCase() === 'link' ? 'href' : 'src', logo);
+      });
+    }
+  }
+
+  function normalizeHome(h) {
+    h = h || {};
+    return {
+      badge: h.badge || 'Home Design',
+      name: h.name || 'Untitled home',
+      price: h.price || '',
+      img: h.img || h.imageDesktop || 'uploads/homes.webp',
+      imgPhone: h.imgPhone || h.imageMobile || h.img || h.imageDesktop || 'uploads/homes.webp',
+      plan: h.plan || 'uploads/PLAN1.webp',
+      planRot: Number(h.planRot || 0),
+      specs: Array.isArray(h.specs) ? h.specs : []
+    };
+  }
+
+  function applyCmsData(data) {
+    if (!data || typeof data !== 'object') return;
+    cmsContent = data;
+    if (Array.isArray(data.phrases) && data.phrases.length) phrases = data.phrases;
+    if (Array.isArray(data.faq)) faqData = data.faq;
+    if (Array.isArray(data.reviews)) reviews = data.reviews;
+    if (data.ownershipSection) {
+      if (Array.isArray(data.ownershipSection.cards)) ownershipCards = data.ownershipSection.cards;
+      if (Array.isArray(data.ownershipSection.tabLabels)) ownTabLabels = data.ownershipSection.tabLabels;
+      if (Array.isArray(data.ownershipSection.benefits)) benefits = data.ownershipSection.benefits;
+    }
+    if (data.homesSection && Array.isArray(data.homesSection.homes)) homes = data.homesSection.homes.map(normalizeHome);
+    if (data.developer && Array.isArray(data.developer.awards)) awards = data.developer.awards;
+    if (data.images) {
+      if (data.images.masterplanDesktop && typeof mapDesktopCfg !== 'undefined') mapDesktopCfg.img = data.images.masterplanDesktop;
+      if (data.images.masterplanMobile && typeof mapMobileCfg !== 'undefined') mapMobileCfg.img = data.images.masterplanMobile;
+    }
+  }
+
+  function loadCmsContent() {
+    if (!window.fetch) return Promise.resolve(null);
+    return fetch('content.json?ts=' + Date.now(), { cache: 'no-store' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .catch(function () { return null; });
+  }
 
   // ---------- data ----------
   var phrases = [
@@ -463,6 +538,14 @@
     if (len > 150) return { font: 'clamp(17px,2.1vw,22px)', line: '1.5', align: 'left', maxw: '560px' };
     return { font: 'clamp(20px,3vw,29px)', line: '1.44', align: 'center', maxw: '520px' };
   }
+  function reviewStarsHtml(review) {
+    var n = Number(review.rating != null ? review.rating : review.stars);
+    if (!isFinite(n)) n = String(review.stars || '').replace(/[^*★]/g, '').length || 5;
+    n = Math.max(0, Math.min(5, Math.round(n)));
+    var html = '';
+    for (var i = 0; i < n; i++) html += '&#9733;';
+    return html;
+  }
   function renderReviews() {
     var stage = $('ulr-rev-stage');
     var n = reviews.length;
@@ -490,7 +573,7 @@
     html += '<div style="position:relative; z-index:2; width:min(620px,100%); opacity:' + cardOpacity + '; transform:translateY(' + cardShift + '); transition:opacity .42s ease, transform .6s cubic-bezier(.22,.61,.36,1);">' +
       '<div style="position:relative; background:linear-gradient(180deg,#3E5A50,rgba(55,81,71,.92)); border:1px solid rgba(247,243,234,.14); border-radius:24px; padding:clamp(34px,5vw,52px) clamp(26px,5vw,52px); box-shadow:0 40px 80px -36px rgba(0,0,0,.5); text-align:center; overflow:hidden;">' +
       '<div data-bloom style="width:64px; height:3px; border-radius:2px; background:#FF6600; margin:0 auto 22px; animation:accentGrow .8s cubic-bezier(.22,.61,.36,1) both;"></div>' +
-      '<div style="display:flex; justify-content:center; gap:5px; color:#FF6600; font-size:17px; margin-bottom:20px; letter-spacing:.08em;">' + active.stars + '</div>' +
+      '<div style="display:flex; justify-content:center; gap:5px; color:#FF6600; font-size:17px; margin-bottom:20px; letter-spacing:.08em;">' + reviewStarsHtml(active) + '</div>' +
       '<p style="margin:0 auto; max-width:' + qs.maxw + '; min-height:clamp(96px,13vh,130px); max-height:46vh; overflow:auto; display:flex; align-items:center; justify-content:center; font-family:\'Libre Baskerville\',serif; font-size:' + qs.font + '; line-height:' + qs.line + '; color:#fff; text-align:' + qs.align + ';"><span>&ldquo;' + esc(aq) + '&rdquo;</span></p>' +
       '<div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-top:30px;">' +
       '<span style="flex:0 0 auto; width:46px; height:46px; border-radius:50%; background:#DED2B8; display:flex; align-items:center; justify-content:center; color:#2C4139; font-weight:700; font-size:15px;">' + esc(active.initials) + '</span>' +
@@ -1365,6 +1448,8 @@
   // ============================================================
   function renderAwards() {
     var host = $('ulr-awards');
+    if (!host) return;
+    host.innerHTML = '';
     awards.forEach(function (aw) {
       host.appendChild(el('<div style="background:linear-gradient(145deg, rgba(247,243,234,.075), rgba(247,243,234,.035)); border:1px solid rgba(247,243,234,.14); border-radius:14px; padding:14px 15px; box-shadow:inset 0 1px 0 rgba(247,243,234,.06);">' +
         '<span style="display:flex; align-items:center; gap:7px; color:#FF6600; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px;"><span style="width:5px; height:5px; border-radius:50%; background:#FF6600; box-shadow:0 0 10px rgba(255,102,0,.45);"></span>' + esc(aw.tag) + '</span>' +
@@ -1629,11 +1714,50 @@
     renderFaq();
   }
 
+  function resetBuiltDynamicContent() {
+    faqBuilt = false;
+    amenitiesBuilt = false;
+    var awardsHost = $('ulr-awards');
+    if (awardsHost) awardsHost.innerHTML = '';
+    var homeImages = $('ulr-home-images');
+    if (homeImages) {
+      homeImages.innerHTML = '';
+      delete homeImages.dataset.built;
+    }
+    ['ulr-home-plan-stage', 'ulr-plan-modal-stage'].forEach(function (id) {
+      var stage = $(id);
+      if (stage) stage.innerHTML = '';
+    });
+    var mapSvg = $('ulr-map-svg');
+    if (mapSvg) mapSvg.innerHTML = '';
+    var mapLabels = $('ulr-map-labels');
+    if (mapLabels) mapLabels.innerHTML = '';
+    var amenitiesLayer = $('ulr-map-amenities');
+    if (amenitiesLayer) amenitiesLayer.innerHTML = '';
+  }
+
+  function applyCmsPreview(data) {
+    applyCmsData(data);
+    applyCmsStaticContent();
+    state.homeIdx = Math.min(state.homeIdx || 0, Math.max(0, homes.length - 1));
+    state.revIdx = Math.min(state.revIdx || 0, Math.max(0, reviews.length - 1));
+    state.faqOpen = Math.min(state.faqOpen || 0, Math.max(-1, faqData.length - 1));
+    resetBuiltDynamicContent();
+    renderPhrase();
+    renderAwards();
+    applyMapConfig();
+    renderMapStatic();
+    renderAmenities();
+    renderReactive();
+    updateIntro();
+  }
+
   // ============================================================
   // INIT
   // ============================================================
   function init() {
     // static one-time
+    applyCmsStaticContent();
     renderPhrase();
     renderAwards();
     applyMapConfig();
@@ -1750,8 +1874,21 @@
       if (!kh.reduced) { kh.lastP = -1; updateKeyhole(); }
       updateIntro();
     });
+
+    window.addEventListener('message', function (event) {
+      if (event.origin !== window.location.origin) return;
+      if (!event.data || event.data.type !== 'ulr-cms-preview') return;
+      applyCmsPreview(event.data.content);
+    });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  function boot() {
+    loadCmsContent().then(function (data) {
+      applyCmsData(data);
+      init();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();

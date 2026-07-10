@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website Editor - United Lifestyle Resort</title>
+<style>
+  * { box-sizing: border-box; }
+  :root { --ink:#1D2521; --green:#2C4139; --green2:#3E5A50; --cream:#F7F3EA; --line:#DED2B8; --orange:#FF6600; --muted:#68776e; --white:#fff; }
+  body { margin:0; min-height:100vh; background:var(--cream); color:var(--ink); font-family:Mulish, system-ui, -apple-system, Segoe UI, sans-serif; }
+  button, input, textarea, select { font:inherit; }
+  .shell { display:grid; grid-template-columns:260px minmax(440px,560px) 1fr; height:100vh; overflow:hidden; }
+  .nav { background:linear-gradient(180deg,var(--green),#1f302a); color:var(--cream); padding:20px 16px; display:flex; flex-direction:column; gap:18px; }
+  .brand { display:flex; gap:12px; align-items:center; padding:4px 6px 14px; border-bottom:1px solid rgba(247,243,234,.14); }
+  .brand img { width:38px; height:38px; object-fit:contain; }
+  .brand strong { display:block; font-family:Georgia,serif; font-weight:400; line-height:1.15; }
+  .brand span { display:block; margin-top:3px; color:rgba(247,243,234,.68); font-size:13px; }
+  .nav button { width:100%; display:flex; align-items:center; justify-content:space-between; border:0; border-radius:10px; color:rgba(247,243,234,.82); background:transparent; padding:13px 12px; cursor:pointer; text-align:left; font-weight:700; }
+  .nav button:hover, .nav button.active { background:rgba(247,243,234,.1); color:#fff; }
+  .nav button.active::after { content:""; width:7px; height:7px; border-radius:50%; background:var(--orange); box-shadow:0 0 14px rgba(255,102,0,.8); }
+  .nav-footer { margin-top:auto; display:grid; gap:9px; }
+  .pill { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:999px; border:1px solid rgba(247,243,234,.2); color:var(--cream); background:rgba(247,243,234,.08); text-decoration:none; font-size:14px; font-weight:700; cursor:pointer; }
+  .editor { overflow:auto; padding:22px; border-right:1px solid #e4d9c0; background:#fffaf0; }
+  .topbar { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .topbar h1 { margin:0; font-family:Georgia,serif; font-size:30px; line-height:1.1; font-weight:400; color:var(--green); }
+  .status { color:var(--muted); font-size:14px; line-height:1.35; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .btn { border:0; border-radius:10px; padding:12px 15px; min-height:44px; cursor:pointer; font-weight:800; background:var(--green); color:var(--cream); }
+  .btn.secondary { background:#fff; color:var(--green); border:1px solid var(--line); }
+  .btn.danger { background:#7b2e20; color:#fff; }
+  .btn.orange { background:var(--orange); color:#fff; }
+  .backup-tools { position:relative; }
+  .backup-tools summary { min-height:44px; display:flex; align-items:center; border:1px solid var(--line); border-radius:10px; padding:0 15px; background:#fff; color:var(--green); font-weight:800; cursor:pointer; list-style:none; }
+  .backup-tools summary::-webkit-details-marker { display:none; }
+  .backup-tools[open] summary { border-color:var(--orange); box-shadow:0 0 0 3px rgba(255,102,0,.1); }
+  .backup-menu { position:absolute; z-index:20; top:50px; left:0; width:220px; display:grid; gap:8px; padding:10px; border:1px solid #eadfc8; border-radius:12px; background:#fffdf8; box-shadow:0 18px 40px -28px rgba(44,65,57,.45); }
+  .backup-menu .btn { width:100%; justify-content:center; text-align:center; }
+  .panel { display:grid; gap:16px; }
+  .card { background:#fff; border:1px solid #eadfc8; border-radius:12px; padding:16px; box-shadow:0 18px 40px -32px rgba(44,65,57,.35); }
+  .card h2, .card h3 { margin:0 0 12px; color:var(--green); font-family:Georgia,serif; font-weight:400; }
+  .card h2 { font-size:22px; }
+  .card h3 { font-size:18px; }
+  .field { display:grid; gap:7px; margin-bottom:12px; }
+  .field label { color:#596860; font-size:13px; font-weight:800; }
+  .field input, .field textarea, .field select { width:100%; border:1px solid #d9cdb5; border-radius:9px; background:#fffdf8; color:var(--ink); padding:12px 12px; outline:none; font-size:16px; }
+  .field textarea { min-height:86px; resize:vertical; line-height:1.45; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(255,102,0,.12); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .list-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+  .item { border:1px solid #eadfc8; border-radius:12px; background:#fffdf8; padding:14px; margin-top:12px; }
+  .item-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .item-title strong { color:var(--green); }
+  .image-row { display:grid; grid-template-columns:82px 1fr; gap:12px; align-items:center; }
+  .thumb { width:82px; height:62px; border-radius:8px; border:1px solid #e1d6c0; background:#f3ead7; object-fit:cover; }
+  .upload { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .upload input[type=file] { max-width:230px; font-size:12px; }
+  .file-hint { color:#68776e; font-size:12px; }
+  .steps { display:grid; gap:10px; margin-top:14px; }
+  .step { display:grid; grid-template-columns:34px 1fr; gap:10px; align-items:start; padding:12px; border:1px solid #eadfc8; border-radius:10px; background:#fffdf8; }
+  .step b { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:var(--orange); color:#fff; }
+  .step strong { display:block; color:var(--green); margin-bottom:3px; }
+  .step span { display:block; color:#68776e; font-size:14px; line-height:1.4; }
+  .soft-note { margin:12px 0 0; color:#68776e; font-size:14px; line-height:1.45; }
+  .auth-gate { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; padding:24px; background:linear-gradient(145deg,#1D2521,#2C4139); color:var(--cream); }
+  .auth-gate.show { display:flex; }
+  .auth-card { width:min(420px,100%); background:#fffaf0; color:var(--ink); border:1px solid #eadfc8; border-radius:16px; padding:24px; box-shadow:0 28px 90px -34px rgba(0,0,0,.75); }
+  .auth-card img { width:52px; height:52px; object-fit:contain; margin-bottom:14px; }
+  .auth-card h1 { margin:0 0 8px; font-family:Georgia,serif; font-size:30px; line-height:1.1; font-weight:400; color:var(--green); }
+  .auth-card p { margin:0 0 18px; color:#68776e; line-height:1.45; }
+  .auth-card input { width:100%; border:1px solid #d9cdb5; border-radius:10px; background:#fffdf8; color:var(--ink); padding:13px 12px; font-size:17px; outline:none; }
+  .auth-card input:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(255,102,0,.12); }
+  .auth-actions { display:flex; gap:10px; align-items:center; margin-top:14px; }
+  .auth-error { min-height:19px; margin-top:10px; color:#8d2e1b; font-size:14px; }
+  .preview { background:#17231f; display:flex; flex-direction:column; min-width:0; }
+  .preview-bar { height:58px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 16px; color:var(--cream); border-bottom:1px solid rgba(247,243,234,.12); }
+  .seg { display:flex; padding:4px; border-radius:999px; background:rgba(247,243,234,.08); border:1px solid rgba(247,243,234,.16); }
+  .seg button { border:0; border-radius:999px; padding:7px 12px; color:rgba(247,243,234,.72); background:transparent; cursor:pointer; font-size:13px; }
+  .seg button.active { color:#fff; background:var(--orange); }
+  .frame-wrap { flex:1; display:flex; align-items:stretch; justify-content:center; overflow:auto; padding:18px; }
+  iframe { width:100%; height:100%; border:0; background:#fff; border-radius:12px; box-shadow:0 30px 80px -40px #000; transition:width .25s ease; }
+  iframe.mobile { width:390px; max-width:100%; }
+  .media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:10px; }
+  .media-grid button { border:1px solid #eadfc8; background:#fff; border-radius:10px; padding:7px; cursor:pointer; text-align:left; color:var(--green); }
+  .media-grid img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:7px; background:#f1e6d0; }
+  .media-grid span { display:block; margin-top:5px; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  @media (max-width:1100px) { .shell { grid-template-columns:220px 1fr; } .preview { display:none; } }
+</style>
+</head>
+<body>
+<div id="authGate" class="auth-gate" aria-hidden="true">
+  <form id="authForm" class="auth-card">
+    <img src="uploads/logo.png" alt="">
+    <h1>Website editor</h1>
+    <p>Enter the editor password to change website content.</p>
+    <input id="authPassword" type="password" autocomplete="current-password" placeholder="Password">
+    <div class="auth-actions">
+      <button class="btn orange" type="submit">Unlock editor</button>
+    </div>
+    <div id="authError" class="auth-error"></div>
+  </form>
+</div>
+
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <img src="uploads/logo.png" alt="">
+      <div><strong>United Lifestyle</strong><span>Website editor</span></div>
+    </div>
+    <div id="nav"></div>
+    <div class="nav-footer">
+      <a class="pill" href="/" target="_blank">Open website</a>
+      <button class="pill" id="lockBtn" type="button">Lock editor</button>
+    </div>
+  </aside>
+
+  <main class="editor">
+    <div class="topbar">
+      <div>
+        <h1 id="sectionTitle">Home</h1>
+        <div id="status" class="status">Loading...</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn orange" id="saveBtn">Save</button>
+      <button class="btn secondary" id="refreshBtn">Undo changes</button>
+      <details class="backup-tools">
+        <summary>Backup</summary>
+        <div class="backup-menu">
+          <button class="btn secondary" id="exportBtn">Download backup</button>
+          <label class="btn secondary" for="importFile" style="cursor:pointer;">Upload backup</label>
+        </div>
+      </details>
+      <input id="importFile" type="file" accept="application/json" hidden>
+    </div>
+    <div id="editor" class="panel"></div>
+  </main>
+
+  <section class="preview">
+    <div class="preview-bar">
+      <strong>Website preview</strong>
+      <div class="seg">
+        <button id="desktopBtn" class="active">Desktop</button>
+        <button id="mobileBtn">Phone</button>
+      </div>
+    </div>
+    <div class="frame-wrap">
+      <iframe id="previewFrame" src="/index.html?adminPreview=1"></iframe>
+    </div>
+  </section>
+</div>
+
+<script>
+const sections = [
+  ['dashboard', 'Home'],
+  ['hero', 'First screen'],
+  ['homes', 'Homes'],
+  ['reviews', 'Reviews'],
+  ['ownership', 'Buying'],
+  ['masterplan', 'Village plan'],
+  ['faq', 'Questions'],
+  ['developer', 'Developer'],
+  ['footer', 'Bottom of site'],
+  ['images', 'Main photos'],
+  ['media', 'All images']
+];
+
+let content = null;
+let media = [];
+let active = 'dashboard';
+let dirty = false;
+let previewTimer = null;
+let pendingPreviewTarget = null;
+
+const previewTargets = {
+  hero: '#ulr-intro',
+  homes: '#ulr-homes',
+  reviews: '[data-screen-label="Reviews"]',
+  ownership: '[data-screen-label="Ownership"]',
+  masterplan: '#ulr-masterplan',
+  faq: '#ulr-faq',
+  developer: '#ulr-contact',
+  footer: 'footer'
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AUTH_KEY = 'ulr-admin-password';
+
+function getAuthPassword() {
+  return sessionStorage.getItem(AUTH_KEY) || '';
+}
+
+function setAuthPassword(value) {
+  if (value) sessionStorage.setItem(AUTH_KEY, value);
+  else sessionStorage.removeItem(AUTH_KEY);
+}
+
+function showAuth(message = '') {
+  $('authGate').classList.add('show');
+  $('authGate').setAttribute('aria-hidden', 'false');
+  $('authError').textContent = message;
+  setTimeout(() => $('authPassword').focus(), 30);
+}
+
+function hideAuth() {
+  $('authGate').classList.remove('show');
+  $('authGate').setAttribute('aria-hidden', 'true');
+  $('authError').textContent = '';
+}
+
+function get(path) {
+  return path.split('.').reduce((obj, key) => obj && obj[key], content);
+}
+
+function set(path, value) {
+  const parts = path.split('.');
+  let cur = content;
+  parts.slice(0, -1).forEach(key => {
+    if (!cur[key] || typeof cur[key] !== 'object') cur[key] = {};
+    cur = cur[key];
+  });
+  cur[parts[parts.length - 1]] = value;
+  markDirty();
+}
+
+async function api(path, options) {
+  const auth = getAuthPassword();
+  const headers = { ...(options?.headers || {}) };
+  if (auth) headers['X-Admin-Password'] = auth;
+  const res = await fetch(path, { ...(options || {}), headers });
+  if (!res.ok) {
+    let body = {};
+    try { body = await res.json(); } catch (err) {}
+    const error = new Error(body.error || res.statusText);
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+async function loadAll() {
+  try {
+    content = await api('/api/content');
+    media = (await api('/api/media')).media;
+    dirty = false;
+    hideAuth();
+    render();
+    postPreview();
+    setStatus('Everything is saved.');
+  } catch (err) {
+    if (err.status === 401) {
+      showAuth(err.message);
+      setStatus('Locked.');
+      return;
+    }
+    throw err;
+  }
+}
+
+function setStatus(text) {
+  $('status').textContent = dirty ? text + ' Remember to click Save.' : text;
+}
+
+function markDirty() {
+  dirty = true;
+  setStatus('Changes made.');
+  schedulePreview();
+}
+
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(postPreview, 220);
+}
+
+function postPreview() {
+  const frame = $('previewFrame');
+  if (!frame.contentWindow || !content) return;
+  frame.contentWindow.postMessage({ type: 'ulr-cms-preview', content }, window.location.origin);
+}
+
+function activateSection(id, scrollPreview = true) {
+  active = id;
+  render();
+  if (scrollPreview) scrollPreviewToSection(id);
+}
+
+function scrollPreviewToSection(id) {
+  const selector = previewTargets[id];
+  if (!selector) return;
+  pendingPreviewTarget = id;
+  setTimeout(() => {
+    const frame = $('previewFrame');
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    if (!win || !doc) return;
+    const target = doc.querySelector(selector);
+    if (!target) return;
+    pendingPreviewTarget = null;
+    const top = target.getBoundingClientRect().top + win.scrollY;
+    win.scrollTo({ top: Math.max(0, top - 12), behavior: 'smooth' });
+  }, 80);
+}
+
+function render() {
+  renderNav();
+  $('sectionTitle').textContent = sections.find(s => s[0] === active)?.[1] || 'Content';
+  $('editor').innerHTML = renderSection();
+  bindEditor();
+}
+
+function renderNav() {
+  $('nav').innerHTML = sections.map(([id, label]) =>
+    `<button class="${id === active ? 'active' : ''}" data-section="${id}">${esc(label)}</button>`
+  ).join('');
+  document.querySelectorAll('[data-section]').forEach(btn => {
+    btn.onclick = () => activateSection(btn.dataset.section);
+  });
+}
+
+function input(label, path, type = 'text') {
+  return `<div class="field"><label>${esc(label)}</label><input data-path="${esc(path)}" type="${type}" value="${esc(get(path) || '')}"></div>`;
+}
+
+function textarea(label, path, rows = 4) {
+  return `<div class="field"><label>${esc(label)}</label><textarea data-path="${esc(path)}" rows="${rows}">${esc(get(path) || '')}</textarea></div>`;
+}
+
+function lines(label, path) {
+  const value = Array.isArray(get(path)) ? get(path).join('\n') : '';
+  return `<div class="field"><label>${esc(label)}</label><textarea data-path="${esc(path)}" data-lines="1" rows="5">${esc(value)}</textarea></div>`;
+}
+
+function imageField(label, path) {
+  const value = get(path) || '';
+  const options = media.map(m => `<option value="${esc(m.path)}" ${m.path === value ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+  const chosen = value ? value.split('/').pop() : 'no image selected';
+  return `<div class="field"><label>${esc(label)}</label>
+    <div class="image-row">
+      <img class="thumb" src="${esc(value || 'uploads/logo.png')}" alt="">
+      <div>
+        <select data-path="${esc(path)}"><option value="">Choose image...</option>${options}</select>
+        <div class="upload">
+          <input data-upload="${esc(path)}" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+          <small class="file-hint">Current: ${esc(chosen)}</small>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSection() {
+  if (!content) return '<div class="card">Loading...</div>';
+  if (active === 'dashboard') return dashboard();
+  if (active === 'hero') return hero();
+  if (active === 'homes') return homes();
+  if (active === 'reviews') return reviews();
+  if (active === 'ownership') return ownership();
+  if (active === 'masterplan') return masterplan();
+  if (active === 'faq') return faq();
+  if (active === 'developer') return developer();
+  if (active === 'footer') return footer();
+  if (active === 'images') return images();
+  if (active === 'media') return mediaLibrary();
+  return '';
+}
+
+function dashboard() {
+  return `<div class="card"><h2>How to edit the website</h2>
+    <p>It is simple: choose a section on the left, change the words or images, then click the orange Save button.</p>
+    <div class="steps">
+      <div class="step"><b>1</b><div><strong>Choose a section</strong><span>For example Homes, Reviews, or Questions.</span></div></div>
+      <div class="step"><b>2</b><div><strong>Make your changes</strong><span>The preview on the right shows how the website will look.</span></div></div>
+      <div class="step"><b>3</b><div><strong>Save</strong><span>Until you click Save, you can still undo your changes.</span></div></div>
+    </div>
+  </div>
+  <div class="card"><h2>What is on the website</h2>
+    <div class="row">
+      <div><strong>${content.homesSection.homes.length}</strong><br><span class="status">home designs</span></div>
+      <div><strong>${content.reviews.length}</strong><br><span class="status">reviews</span></div>
+      <div><strong>${content.faq.length}</strong><br><span class="status">questions</span></div>
+      <div><strong>${media.length}</strong><br><span class="status">images</span></div>
+    </div>
+  </div>
+  <div class="card"><h2>Quick links</h2>
+    <button class="btn secondary" data-section-jump="homes">Edit homes</button>
+    <button class="btn secondary" data-section-jump="images">Change main photos</button>
+    <button class="btn secondary" data-section-jump="media">Open images</button>
+    <p class="soft-note">The Backup button is only for saving or restoring a copy before bigger changes.</p>
+  </div>`;
+}
+
+function hero() {
+  return `<div class="card"><h2>Page name</h2>${input('Browser tab title','meta.title')}${textarea('Short search description','meta.description')}</div>
+  <div class="card"><h2>First screen</h2>${input('Location','intro.location')}${input('Main heading','intro.title')}${lines('Rotating phrases at the top','phrases')}</div>
+  <div class="card"><h2>Text after the first screen</h2>${input('Small label','intro.outroEyebrow')}${input('Heading','intro.outroTitle')}${textarea('Large text','intro.outroLead')}${textarea('Body text','intro.outroBody')}</div>`;
+}
+
+function homes() {
+  return `<div class="card"><h2>Homes section</h2>${input('Small label','homesSection.eyebrow')}${input('Heading','homesSection.title')}${textarea('Intro text','homesSection.body')}</div>
+  <div class="card"><div class="list-head"><h2>Home designs</h2><button class="btn orange" data-add-home>Add home</button></div>
+  ${content.homesSection.homes.map((h, i) => homeItem(h, i)).join('')}</div>`;
+}
+
+function homeItem(h, i) {
+  const base = `homesSection.homes.${i}`;
+  return `<div class="item"><div class="item-title"><strong>${esc(h.name || 'Home')}</strong><button class="btn danger" data-remove-home="${i}" ${content.homesSection.homes.length <= 1 ? 'disabled' : ''}>Remove</button></div>
+    <div class="row">${input('Label above name', `${base}.badge`)}${input('Home name', `${base}.name`)}</div>
+    ${input('Price', `${base}.price`)}
+    ${lines('Features, one per line', `${base}.specs`)}
+    ${imageField('Photo for desktop', `${base}.imageDesktop`)}
+    ${imageField('Photo for phone', `${base}.imageMobile`)}
+    ${imageField('Floor plan', `${base}.plan`)}
+    ${input('Rotate floor plan if needed', `${base}.planRot`, 'number')}
+  </div>`;
+}
+
+function reviews() {
+  return `<div class="card"><h2>Reviews heading</h2>${input('Small label','reviewsSection.eyebrow')}${input('Heading','reviewsSection.title')}</div>
+  <div class="card"><div class="list-head"><h2>Reviews</h2><button class="btn orange" data-add-review>Add review</button></div>
+  ${content.reviews.map((r, i) => {
+    const base = `reviews.${i}`;
+    return `<div class="item"><div class="item-title"><strong>${esc(r.name || 'Review')}</strong><button class="btn danger" data-remove-review="${i}" ${content.reviews.length <= 1 ? 'disabled' : ''}>Remove</button></div>
+      ${textarea('Review text', `${base}.quote`)}
+      <div class="row">${input('Name', `${base}.name`)}${input('Person description', `${base}.role`)}</div>
+      <div class="row">${input('Initials', `${base}.initials`)}${input('Rating from 1 to 5', `${base}.rating`, 'number')}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function ownership() {
+  return `<div class="card"><h2>Buying section</h2>${input('Small label','ownershipSection.eyebrow')}${input('Heading','ownershipSection.title')}${textarea('Main text','ownershipSection.body')}${input('Label above price','ownershipSection.priceEyebrow')}${input('Price','ownershipSection.price')}${textarea('Text below price','ownershipSection.priceBody')}</div>
+  <div class="card"><h2>Benefits</h2>${lines('Tab names','ownershipSection.tabLabels')}${lines('Short benefits','ownershipSection.benefits')}</div>
+  <div class="card"><div class="list-head"><h2>Buying cards</h2><button class="btn orange" data-add-ownership-card>Add card</button></div>
+  ${content.ownershipSection.cards.map((c, i) => `<div class="item"><div class="item-title"><strong>${esc(c.title || 'Card')}</strong><button class="btn danger" data-remove-ownership-card="${i}" ${content.ownershipSection.cards.length <= 1 ? 'disabled' : ''}>Remove</button></div>${input('Heading', `ownershipSection.cards.${i}.title`)}${textarea('Text', `ownershipSection.cards.${i}.body`)}</div>`).join('')}</div>`;
+}
+
+function masterplan() {
+  return `<div class="card"><h2>Text above the village plan</h2>${input('Small label','masterplanSection.eyebrow')}${input('Heading','masterplanSection.title')}${textarea('Text','masterplanSection.body')}</div>
+  <div class="card"><h2>Plan images</h2>${imageField('Plan for desktop','images.masterplanDesktop')}${imageField('Plan for phone','images.masterplanMobile')}</div>`;
+}
+
+function faq() {
+  return `<div class="card"><h2>Questions heading</h2>${input('Small label','faqSection.eyebrow')}${input('Heading','faqSection.title')}${textarea('Intro text','faqSection.body')}${input('Button text','faqSection.cta')}</div>
+  <div class="card"><div class="list-head"><h2>Questions and answers</h2><button class="btn orange" data-add-faq>Add question</button></div>
+  ${content.faq.map((f, i) => `<div class="item"><div class="item-title"><strong>${esc(f.q || 'Question')}</strong><button class="btn danger" data-remove-faq="${i}" ${content.faq.length <= 1 ? 'disabled' : ''}>Remove</button></div>${input('Question', `faq.${i}.q`)}${textarea('Answer', `faq.${i}.a`)}</div>`).join('')}</div>`;
+}
+
+function developer() {
+  return `<div class="card"><h2>Developer section</h2>${input('Small label','developer.eyebrow')}${textarea('Quote','developer.quote')}${textarea('Main text','developer.body')}${input('Name','developer.name')}${input('Role or description','developer.role')}${imageField('Photo','images.developerPortrait')}</div>
+  <div class="card"><div class="list-head"><h2>Trust cards</h2><button class="btn orange" data-add-award>Add card</button></div>
+  ${content.developer.awards.map((a, i) => `<div class="item"><div class="item-title"><strong>${esc(a.tag || 'Card')}</strong><button class="btn danger" data-remove-award="${i}" ${content.developer.awards.length <= 1 ? 'disabled' : ''}>Remove</button></div>${input('Short label', `developer.awards.${i}.tag`)}${textarea('Text', `developer.awards.${i}.title`)}</div>`).join('')}</div>`;
+}
+
+function footer() {
+  return `<div class="card"><h2>Bottom of site</h2>${textarea('About text','footer.body')}${input('Address heading','footer.visitTitle')}${textarea('Address','footer.address')}${textarea('Contact details','footer.contact')}${input('Extra links heading','footer.moreTitle')}${textarea('Copyright line','footer.copyright')}</div>`;
+}
+
+function images() {
+  return `<div class="card"><h2>Main website images</h2>
+    ${imageField('Logo','images.logo')}
+    ${imageField('Clouds on first screen','images.introClouds')}
+    ${imageField('Homes on first screen','images.introHomes')}
+    ${imageField('Home exterior','images.keyholeExterior')}
+    ${imageField('Home interior','images.keyholeInterior')}
+    ${imageField('Questions background','images.faqBackground')}
+    ${imageField('Developer photo','images.developerPortrait')}
+  </div>`;
+}
+
+function mediaLibrary() {
+  return `<div class="card"><h2>Add an image</h2><div class="upload"><input id="libraryUpload" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button class="btn orange" id="libraryUploadBtn">Upload</button></div><p class="soft-note">After uploading, you can choose the image in Homes or Main photos.</p></div>
+  <div class="card"><h2>All images</h2><div class="media-grid">${media.map(m => `<button title="${esc(m.name)}"><img src="${esc(m.path)}" alt=""><span>${esc(m.name)}</span></button>`).join('')}</div></div>`;
+}
+
+function bindEditor() {
+  document.querySelectorAll('[data-path]').forEach(el => {
+    el.oninput = el.onchange = () => {
+      const value = el.dataset.lines ? el.value.split(/\r?\n/).map(x => x.trim()).filter(Boolean) : (el.type === 'number' ? Number(el.value || 0) : el.value);
+      set(el.dataset.path, value);
+    };
+  });
+  document.querySelectorAll('[data-upload]').forEach(el => {
+    el.onchange = async () => {
+      if (!el.files || !el.files[0]) return;
+      const uploaded = await uploadFile(el.files[0]);
+      set(el.dataset.upload, uploaded.path);
+      media = uploaded.media;
+      render();
+      postPreview();
+    };
+  });
+  document.querySelectorAll('[data-section-jump]').forEach(btn => btn.onclick = () => activateSection(btn.dataset.sectionJump));
+  const add = (selector, listPath, item) => { const b = document.querySelector(selector); if (b) b.onclick = () => { get(listPath).push(item); markDirty(); render(); }; };
+  add('[data-add-home]', 'homesSection.homes', { badge:'New home', name:'HOME NAME', price:'Price coming soon', imageDesktop:'uploads/homes.webp', imageMobile:'uploads/homes.webp', plan:'uploads/PLAN1.webp', planRot:0, specs:['2 bedrooms','1 bathroom'] });
+  add('[data-add-review]', 'reviews', { quote:'New review text.', name:'Resident name', role:'Resident', initials:'R', rating:5 });
+  add('[data-add-faq]', 'faq', { q:'New question?', a:'Answer to the question.' });
+  add('[data-add-ownership-card]', 'ownershipSection.cards', { title:'New card', body:'Card text.' });
+  add('[data-add-award]', 'developer.awards', { tag:'New label', title:'Trust card text.' });
+  bindRemove('[data-remove-home]', 'homesSection.homes');
+  bindRemove('[data-remove-review]', 'reviews');
+  bindRemove('[data-remove-faq]', 'faq');
+  bindRemove('[data-remove-ownership-card]', 'ownershipSection.cards');
+  bindRemove('[data-remove-award]', 'developer.awards');
+  const libBtn = $('libraryUploadBtn');
+  if (libBtn) libBtn.onclick = async () => {
+    const file = $('libraryUpload').files[0];
+    if (!file) return;
+    const uploaded = await uploadFile(file);
+    media = uploaded.media;
+    render();
+  };
+}
+
+function bindRemove(selector, listPath) {
+  document.querySelectorAll(selector).forEach(btn => {
+    btn.onclick = () => {
+      const list = get(listPath);
+      if (list.length <= 1) return;
+      list.splice(Number(btn.getAttribute(selector.match(/\[([^\]]+)/)[1].split('=')[0])), 1);
+      markDirty();
+      render();
+    };
+  });
+}
+
+async function uploadFile(file) {
+  const prepared = await prepareImageForUpload(file);
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(prepared.file);
+  });
+  setStatus('Uploading image...');
+  return api('/api/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fileName: prepared.fileName, dataUrl })
+  });
+}
+
+async function prepareImageForUpload(file) {
+  if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
+    return { file, fileName: file.name };
+  }
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+      image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image.')); };
+      image.src = url;
+    });
+    const maxSide = 2200;
+    const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+    canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.86));
+    if (!blob || blob.size >= file.size) return { file, fileName: file.name };
+    return {
+      file: blob,
+      fileName: file.name.replace(/\.[^.]+$/, '') + '.webp'
+    };
+  } catch (err) {
+    return { file, fileName: file.name };
+  }
+}
+
+$('saveBtn').onclick = async () => {
+  setStatus('Saving...');
+  await api('/api/content', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(content) });
+  dirty = false;
+  setStatus('Saved. The live website will update after Vercel finishes publishing.');
+  $('previewFrame').src = '/index.html?adminPreview=' + Date.now();
+};
+
+$('refreshBtn').onclick = () => {
+  if (dirty && !window.confirm('Undo your unsaved changes and return to the last saved version?')) return;
+  loadAll();
+};
+$('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(content, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'site-backup.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$('importFile').onchange = async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  content = JSON.parse(await file.text());
+  dirty = true;
+  render();
+  postPreview();
+  setStatus('Backup uploaded.');
+};
+$('authForm').onsubmit = async e => {
+  e.preventDefault();
+  const password = $('authPassword').value.trim();
+  if (!password) {
+    $('authError').textContent = 'Please enter the password.';
+    return;
+  }
+  setAuthPassword(password);
+  $('authError').textContent = 'Checking password...';
+  try {
+    await loadAll();
+    $('authPassword').value = '';
+  } catch (err) {
+    setAuthPassword('');
+    showAuth(err.message || 'The password was not accepted.');
+  }
+};
+$('lockBtn').onclick = () => {
+  setAuthPassword('');
+  showAuth('The editor is locked.');
+};
+$('desktopBtn').onclick = () => { $('previewFrame').classList.remove('mobile'); $('desktopBtn').classList.add('active'); $('mobileBtn').classList.remove('active'); };
+$('mobileBtn').onclick = () => { $('previewFrame').classList.add('mobile'); $('mobileBtn').classList.add('active'); $('desktopBtn').classList.remove('active'); };
+$('previewFrame').addEventListener('load', () => {
+  postPreview();
+  if (pendingPreviewTarget) scrollPreviewToSection(pendingPreviewTarget);
+});
+
+window.addEventListener('beforeunload', e => {
+  if (!dirty) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+loadAll().catch(err => {
+  $('editor').innerHTML = `<div class="card"><h2>The editor could not open</h2><p>${esc(err.message)}</p></div>`;
+  setStatus('Loading error.');
+});
+</script>
+</body>
+</html>
