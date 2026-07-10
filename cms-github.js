@@ -67,7 +67,8 @@ async function readJsonBody(req) {
 }
 
 function githubConfig() {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  const rawToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
+  const token = rawToken.replace(/^Bearer\s+/i, '').trim();
   const repo = process.env.GITHUB_REPO || [process.env.VERCEL_GIT_REPO_OWNER, process.env.VERCEL_GIT_REPO_SLUG].filter(Boolean).join('/');
   const branch = process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || 'main';
   if (!token) throw new Error('Missing GITHUB_TOKEN environment variable.');
@@ -91,7 +92,11 @@ async function githubRequest(path, options = {}) {
   const text = await res.text();
   const body = text ? JSON.parse(text) : null;
   if (!res.ok) {
-    throw new Error(body?.message || `GitHub request failed with status ${res.status}.`);
+    const message = body?.message || `GitHub request failed with status ${res.status}.`;
+    if (/bad credentials/i.test(message)) {
+      throw new Error('GitHub token was not accepted. Check GITHUB_TOKEN in Vercel.');
+    }
+    throw new Error(message);
   }
   return body;
 }
