@@ -1,0 +1,14 @@
+{
+  "name": "united-lifestyle-traralgon-cms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Website and lightweight file-based CMS for United Lifestyle Resort Traralgon",
+  "main": "admin-server.js",
+  "scripts": {
+    "start": "node admin-server.js",
+    "check": "node --check admin-server.js && node --check app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -14,6 +14,8 @@
   function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
   var cmsContent = null;
+  var cmsFingerprint = '';
+  var cmsLiveChannel = null;
 
   function getCms(path, fallback) {
     if (!cmsContent || !path) return fallback;
@@ -66,6 +68,7 @@
   function applyCmsData(data) {
     if (!data || typeof data !== 'object') return;
     cmsContent = data;
+    try { cmsFingerprint = JSON.stringify(data); } catch (_) { cmsFingerprint = ''; }
     if (Array.isArray(data.phrases) && data.phrases.length) phrases = data.phrases;
     if (Array.isArray(data.faq)) faqData = data.faq;
     if (Array.isArray(data.reviews)) reviews = data.reviews;
@@ -84,9 +87,28 @@
 
   function loadCmsContent() {
     if (!window.fetch) return Promise.resolve(null);
-    return fetch('content.json?ts=' + Date.now(), { cache: 'no-store' })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .catch(function () { return null; });
+    return fetch('/api/content', { cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Live content API is unavailable.');
+        return res.json();
+      })
+      .catch(function () {
+        // Keeps a local-file/static copy usable as a read-only fallback.
+        return fetch('content.json?ts=' + Date.now(), { cache: 'no-store' })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .catch(function () { return null; });
+      });
+  }
+
+  function refreshCmsContent() {
+    if (document.hidden) return Promise.resolve();
+    return loadCmsContent().then(function (data) {
+      if (!data) return;
+      var nextFingerprint = '';
+      try { nextFingerprint = JSON.stringify(data); } catch (_) {}
+      if (nextFingerprint && nextFingerprint === cmsFingerprint) return;
+      applyCmsPreview(data);
+    });
   }
 
   // ---------- data ----------
@@ -1880,6 +1902,22 @@
       if (!event.data || event.data.type !== 'ulr-cms-preview') return;
       applyCmsPreview(event.data.content);
     });
+
+    // An admin tab on the same origin updates an already-open website instantly.
+    if ('BroadcastChannel' in window) {
+      cmsLiveChannel = new BroadcastChannel('ulr-cms-live');
+      cmsLiveChannel.onmessage = function (event) {
+        if (!event.data || event.data.type !== 'ulr-cms-update') return;
+        applyCmsPreview(event.data.content);
+      };
+    }
+    window.addEventListener('storage', function (event) {
+      if (event.key === 'ulr-cms-updated-at') refreshCmsContent();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) refreshCmsContent();
+    });
+    window.setInterval(refreshCmsContent, 30000);
   }
 
   function boot() {
