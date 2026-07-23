@@ -87,6 +87,27 @@
     #ulr-intro-track { height:255vh !important; }
     #ulr-intro-homes { top:135vh !important; }
 
+    /* Hidden A/B mode: /?introTest=fade. Two fixed images cross-fade; nothing pans,
+       scales or uses a live mask while the phone scrolls through the intro. */
+    html.ulr-intro-fade-test #ulr-intro { height:260svh !important; }
+    html.ulr-intro-fade-test #ulr-intro-pin { height:100svh !important; }
+    html.ulr-intro-fade-test #ulr-intro-scale {
+      transform:none !important; will-change:auto !important;
+      z-index:0; isolation:isolate;
+    }
+    html.ulr-intro-fade-test #ulr-intro-track {
+      inset:0 !important; height:100svh !important; transform:none !important;
+      will-change:auto !important; overflow:hidden;
+    }
+    html.ulr-intro-fade-test #ulr-intro-clouds,
+    html.ulr-intro-fade-test #ulr-intro-homes {
+      left:0 !important; top:-5svh !important; width:100% !important; height:110svh !important;
+      -webkit-mask-image:none !important; mask-image:none !important;
+      will-change:opacity; backface-visibility:hidden;
+    }
+    html.ulr-intro-fade-test #ulr-intro-clouds { z-index:1; opacity:1; }
+    html.ulr-intro-fade-test #ulr-intro-homes { z-index:2; opacity:0; }
+
     /* masterplan: wider square map; amenity markers → teardrop map pins (clean, high contrast) */
     #ulr-masterplan { padding-left:clamp(10px,3vw,16px) !important; padding-right:clamp(10px,3vw,16px) !important; }
     /* zoom the whole map (image + zones + markers together) to crop the empty forest/road margins */
@@ -193,10 +214,10 @@
 
   <!-- ===================== INTRO: CLOUDS -> HOMES (scroll transition) ===================== -->
   <section id="ulr-intro" data-screen-label="Intro" style="position:relative; height:400vh; background:#88a6c8;">
-    <div style="position:sticky; top:0; height:100vh; overflow:hidden; background:#9fb9d3;">
+    <div id="ulr-intro-pin" style="position:sticky; top:0; height:100vh; overflow:hidden; background:#9fb9d3;">
       <div id="ulr-intro-scale" style="position:absolute; inset:0; transform-origin:50% 50%; will-change:transform;">
         <div id="ulr-intro-track" style="position:absolute; left:0; top:0; width:100%; height:280vh; will-change:transform; background:linear-gradient(180deg, #88a6c8 0%, #92afd0 28%, #abc2df 44%, #c9d6ea 56%, #e3e8f7 66%, #e3e8f7 100%);">
-          <img data-cms-img="images.introClouds" src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
+          <img id="ulr-intro-clouds" data-cms-img="images.introClouds" src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
           <img id="ulr-intro-homes" data-cms-img="images.introHomes" src="uploads/homes.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
         </div>
       </div>

@@ -13,6 +13,16 @@
   }
   function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  var introFadeTest = new URLSearchParams(window.location.search).get('introTest') === 'fade';
+  var introSectionEnd = 0;
+  if (introFadeTest) document.documentElement.classList.add('ulr-intro-fade-test');
+  function measureIntroSectionEnd() {
+    var intro = $('ulr-intro');
+    introSectionEnd = intro ? intro.offsetTop + intro.offsetHeight : 0;
+  }
+  function fadeTestIntroActive() {
+    return introFadeTest && state.isMobile && window.pageYOffset < introSectionEnd;
+  }
   var cmsContent = null;
   var cmsFingerprint = '';
   var cmsLiveChannel = null;
@@ -652,7 +662,7 @@
   }
   function revNext() { revGo(state.revIdx + 1); }
   function revPrev() { revGo(state.revIdx - 1); }
-  function revStartAuto() { revStopAuto(); revAuto = setInterval(function () { if (!state.revPaused && !document.hidden) revNext(); }, 8500); }
+  function revStartAuto() { revStopAuto(); revAuto = setInterval(function () { if (!state.revPaused && !document.hidden && !fadeTestIntroActive()) revNext(); }, 8500); }
   function revStopAuto() { if (revAuto) { clearInterval(revAuto); revAuto = null; } }
 
   // ============================================================
@@ -877,7 +887,7 @@
   }
   function homeNext() { homeGo(state.homeIdx + 1); }
   function homePrev() { homeGo(state.homeIdx - 1); }
-  function homeStartAuto() { homeStopAuto(); homeAuto = setInterval(function () { if (!state.homePaused && !state.planModalOpen && !document.hidden) homeNext(); }, 8000); }
+  function homeStartAuto() { homeStopAuto(); homeAuto = setInterval(function () { if (!state.homePaused && !state.planModalOpen && !document.hidden && !fadeTestIntroActive()) homeNext(); }, 8000); }
   function homeStopAuto() { if (homeAuto) { clearInterval(homeAuto); homeAuto = null; } }
   function homeRestartAuto() { homeStartAuto(); }
 
@@ -1516,16 +1526,19 @@
 
   function onScroll() {
     var vh = window.innerHeight;
+    var fadeIntroActive = fadeTestIntroActive();
     // The landing screen (quiz form + headline) and the header reveal now live inside
     // the clouds intro — see updateIntro(). No separate hero block here anymore.
-    Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function (elm) {
-      var r = elm.getBoundingClientRect();
-      var prog = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
-      elm.style.transform = 'scale(' + (1.02 + prog * 0.16) + ')';
-    });
+    if (!fadeIntroActive) {
+      Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function (elm) {
+        var r = elm.getBoundingClientRect();
+        var prog = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+        elm.style.transform = 'scale(' + (1.02 + prog * 0.16) + ')';
+      });
+    }
 
     // keyhole: progress tracks native scroll position (see updateKeyhole / khTick)
-    if (!kh.reduced) updateKeyhole();
+    if (!kh.reduced && !fadeIntroActive) updateKeyhole();
     // intro clouds->homes transition (scroll-driven)
     updateIntro();
   }
@@ -1646,14 +1659,27 @@
     if (scrollable <= 0) return;
     var scrolled = Math.min(Math.max(-root.getBoundingClientRect().top, 0), scrollable);
     var p = scrolled / scrollable;
-    // Camera pan + scale run across the WHOLE section (clouds -> homes).
-    // Phones use a shorter track (255vh vs 280vh, see @media) to trim the empty sky — pan less so the homes still fills the frame.
-    var camFactor = state.isMobile ? 1.55 : 1.80;
-    var camY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (camFactor * vh);
-    var scale = introInterp([0, 0.1, 0.5, 0.92, 1], [1.02, 1.03, 1.05, 1.04, 1.06], p);
     var track = $('ulr-intro-track'), scaleEl = $('ulr-intro-scale');
-    if (track) track.style.transform = 'translateY(' + (-camY) + 'px)';
-    if (scaleEl) scaleEl.style.transform = 'scale(' + scale + ')';
+    var clouds = $('ulr-intro-clouds'), homesBackground = $('ulr-intro-homes');
+    var fadeBackground = introFadeTest && state.isMobile;
+    if (fadeBackground) {
+      // Test mode: two already-sized layers cross-fade. No moving 255vh surface,
+      // parent zoom or live image masks are involved.
+      var homesOpacity = smoothstep(p, 0.16, 0.60);
+      if (track) track.style.transform = 'none';
+      if (scaleEl) scaleEl.style.transform = 'none';
+      if (clouds) clouds.style.opacity = String(1 - homesOpacity);
+      if (homesBackground) homesBackground.style.opacity = String(homesOpacity);
+    } else {
+      // Default camera pan + scale across the whole section.
+      var camFactor = state.isMobile ? 1.55 : 1.80;
+      var camY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (camFactor * vh);
+      var scale = introInterp([0, 0.1, 0.5, 0.92, 1], [1.02, 1.03, 1.05, 1.04, 1.06], p);
+      if (track) track.style.transform = 'translateY(' + (-camY) + 'px)';
+      if (scaleEl) scaleEl.style.transform = 'scale(' + scale + ')';
+      if (clouds) clouds.style.opacity = '1';
+      if (homesBackground) homesBackground.style.opacity = '1';
+    }
 
     // Overlay transitions are keyed to raw scroll (viewport-heights), so they feel like
     // a normal hero hand-off regardless of section length. The headline clears first.
@@ -1904,11 +1930,16 @@
 
     // reveals + scroll
     initReveals();
+    measureIntroSectionEnd();
     window.addEventListener('scroll', onScrollRaf, { passive: true });
     onScroll();
 
     // phrases rotation
-    setInterval(function () { state.phraseIdx = (state.phraseIdx + 1) % phrases.length; renderPhrase(); }, 3600);
+    setInterval(function () {
+      if (fadeTestIntroActive()) return;
+      state.phraseIdx = (state.phraseIdx + 1) % phrases.length;
+      renderPhrase();
+    }, 3600);
 
     applyResponsive();
     initKeyhole();
@@ -1923,6 +1954,7 @@
       state.isMobile = window.matchMedia('(max-width:760px)').matches;
       applyResponsive();
       if (wasMobile !== state.isMobile) { applyMapConfig(); renderMapStatic(); renderAmenities(); renderReactive(); closeAmenitySheet(); closeAmenityPins(); closeNearbyPanel(); }
+      measureIntroSectionEnd();
       if (!kh.reduced) { kh.lastP = -1; updateKeyhole(); }
       updateIntro();
     });
