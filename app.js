@@ -15,11 +15,27 @@
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
   var introTestMode = new URLSearchParams(window.location.search).get('introTest') || '';
   var introFadeTest = introTestMode === 'fade';
-  var introPanTest = introTestMode === 'pan';
+  var introCssRequested = introTestMode === 'css';
+  var introCssSupported = introCssRequested && typeof CSS !== 'undefined' &&
+    CSS.supports('animation-timeline', 'view()');
+  var introCssTest = introCssRequested && introCssSupported;
+  var introPanTest = introTestMode === 'pan' || (introCssRequested && !introCssSupported);
   var introSectionEnd = 0;
   var introMetrics = { top: 0, height: 0, pinHeight: 0, viewportHeight: 0 };
   if (introFadeTest) document.documentElement.classList.add('ulr-intro-fade-test');
   if (introPanTest) document.documentElement.classList.add('ulr-intro-pan-test');
+  if (introCssTest) document.documentElement.classList.add('ulr-intro-css-test');
+  function lockCssIntroStage() {
+    if (!introCssTest || !state.isMobile) return;
+    var doc = document.documentElement;
+    doc.style.removeProperty('--ulr-intro-stage-h');
+    doc.style.removeProperty('--ulr-intro-pan-y');
+    var scene = $('ulr-intro-scale');
+    var sceneHeight = scene ? scene.getBoundingClientRect().height : 0;
+    var lockedHeight = Math.ceil(Math.max(sceneHeight, document.documentElement.clientHeight, window.innerHeight));
+    doc.style.setProperty('--ulr-intro-stage-h', lockedHeight + 'px');
+    doc.style.setProperty('--ulr-intro-pan-y', (-1.55 * lockedHeight) + 'px');
+  }
   function measureIntroSectionEnd() {
     var intro = $('ulr-intro');
     if (!intro) {
@@ -29,7 +45,7 @@
     }
     var pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
     var pin = $('ulr-intro-pin');
-    var scene = introPanTest && state.isMobile ? $('ulr-intro-scale') : pin;
+    var scene = (introPanTest || introCssTest) && state.isMobile ? $('ulr-intro-scale') : pin;
     introMetrics.top = intro.getBoundingClientRect().top + pageY;
     introMetrics.height = intro.offsetHeight;
     introMetrics.pinHeight = pin ? pin.getBoundingClientRect().height : window.innerHeight;
@@ -37,7 +53,7 @@
     introSectionEnd = introMetrics.top + introMetrics.height;
   }
   function introTestActive() {
-    return (introFadeTest || introPanTest) && state.isMobile && window.pageYOffset < introSectionEnd;
+    return (introFadeTest || introPanTest || introCssTest) && state.isMobile && window.pageYOffset < introSectionEnd;
   }
   var cmsContent = null;
   var cmsFingerprint = '';
@@ -1714,9 +1730,12 @@
   // Progress comes straight from the tall #ulr-intro section's scroll position; its
   // sticky child stays pinned while p runs 0->1, panning the camera clouds -> homes.
   function updateIntro() {
+    // In CSS test mode WebKit resolves the complete intro from the root scroll timeline.
+    // Avoid all per-scroll reads and writes so threaded scroll animations can run.
+    if (introCssTest && state.isMobile) return;
     var root = $('ulr-intro');
     if (!root) return;
-    var optimizedTest = (introFadeTest || introPanTest) && state.isMobile;
+    var optimizedTest = (introFadeTest || introPanTest || introCssTest) && state.isMobile;
     var vh = optimizedTest && introMetrics.viewportHeight ? introMetrics.viewportHeight : window.innerHeight;
     var rootHeight = optimizedTest && introMetrics.height ? introMetrics.height : root.offsetHeight;
     var pinHeight = optimizedTest && introMetrics.pinHeight ? introMetrics.pinHeight : vh;
@@ -2017,6 +2036,7 @@
     });
 
     // reveals + scroll
+    lockCssIntroStage();
     initReveals();
     measureIntroSectionEnd();
     window.addEventListener('scroll', onScrollRaf, { passive: true });
@@ -2053,6 +2073,7 @@
         state.isMobile = window.matchMedia('(max-width:760px)').matches;
         applyResponsive();
         if (wasMobile !== state.isMobile) { applyMapConfig(); renderMapStatic(); renderAmenities(); renderReactive(); closeAmenitySheet(); closeAmenityPins(); closeNearbyPanel(); }
+        lockCssIntroStage();
         measureIntroSectionEnd();
         if (!kh.reduced && !introTestActive()) { kh.lastP = -1; updateKeyhole(); }
         updateIntro();

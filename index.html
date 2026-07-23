@@ -160,6 +160,145 @@
       height:max(100vh, 100lvh, 100dvh);
     }
 
+    /* Hidden A/B mode: /?introTest=css. Safari 26.4+ can resolve these
+       root scroll-timeline transforms on its scrolling thread, without JS per frame. */
+    @keyframes ulrIntroCssPan {
+      0%, 6% {
+        transform:translate3d(0,0,0);
+        animation-timing-function:cubic-bezier(.37,0,.63,1);
+      }
+      96%, 100% { transform:translate3d(0,var(--ulr-intro-pan-y,-155lvh),0); }
+    }
+    @keyframes ulrIntroCssHead {
+      0%, 2.3% {
+        opacity:1; transform:translateY(0); visibility:visible;
+        animation-timing-function:cubic-bezier(.37,0,.63,1);
+      }
+      19.1% { opacity:0; transform:translateY(-26px); visibility:visible; }
+      19.11%, 100% { opacity:0; transform:translateY(-26px); visibility:hidden; }
+    }
+    @keyframes ulrIntroCssTitleLife {
+      0%, 19.1% { visibility:visible; }
+      19.11%, 100% { visibility:hidden; }
+    }
+    @keyframes ulrIntroCssForm {
+      0%, 10.9% { opacity:1; visibility:visible; pointer-events:auto; }
+      10.91% {
+        opacity:1; visibility:visible; pointer-events:none;
+        animation-timing-function:cubic-bezier(.37,0,.63,1);
+      }
+      24.2% { opacity:0; visibility:visible; pointer-events:none; }
+      24.21%, 100% { opacity:0; visibility:hidden; pointer-events:none; }
+    }
+    @keyframes ulrIntroCssHeader {
+      0%, 26.19% { opacity:0; visibility:hidden; pointer-events:none; }
+      26.2% {
+        opacity:0; visibility:visible; pointer-events:none;
+        animation-timing-function:cubic-bezier(.37,0,.63,1);
+      }
+      37.7%, 100% { opacity:1; visibility:visible; pointer-events:auto; }
+    }
+    @keyframes ulrIntroCssOutro {
+      0%, 51.99% { opacity:0; visibility:hidden; pointer-events:none; }
+      52% {
+        opacity:0; visibility:visible; pointer-events:none;
+        animation-timing-function:cubic-bezier(.37,0,.63,1);
+      }
+      72%, 100% { opacity:1; visibility:visible; pointer-events:auto; }
+    }
+    html.ulr-intro-css-test #ulr-intro {
+      height:calc(220svh + var(--ulr-intro-stage-h,100lvh)) !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-pin {
+      height:var(--ulr-intro-stage-h,100lvh) !important;
+      overflow:hidden !important;
+      background:transparent !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-scale {
+      inset:0 0 auto !important;
+      height:var(--ulr-intro-stage-h,100lvh) !important;
+      transform:none !important; will-change:auto !important;
+      overflow:hidden; contain:paint; z-index:0;
+      background:#b9cae1;
+    }
+    html.ulr-intro-css-test #ulr-intro-track {
+      inset:0 !important; height:100% !important;
+      transform:none !important; will-change:auto !important;
+      background:none !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-clouds,
+    html.ulr-intro-css-test #ulr-intro-homes {
+      width:100% !important;
+      -webkit-mask-image:none !important; mask-image:none !important;
+      will-change:transform; backface-visibility:hidden;
+    }
+    html.ulr-intro-css-test #ulr-intro-clouds {
+      top:0 !important; height:120% !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-homes {
+      top:135% !important; height:125% !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-cloud-fade,
+    html.ulr-intro-css-test #ulr-intro-homes-fade {
+      display:block !important; will-change:transform;
+      backface-visibility:hidden;
+    }
+    html.ulr-intro-css-test #ulr-intro-cloud-fade {
+      top:86% !important; height:49% !important;
+      background:linear-gradient(180deg,rgba(172,195,223,0) 0%,#acc3df 53%,#b3c7e2 70%,#c1d1e7 100%) !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-homes-fade {
+      top:calc(135% - 3px) !important; height:calc(17% + 3px) !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-clouds,
+    html.ulr-intro-css-test #ulr-intro-homes,
+    html.ulr-intro-css-test #ulr-intro-cloud-fade,
+    html.ulr-intro-css-test #ulr-intro-homes-fade {
+      animation:ulrIntroCssPan 1s linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0px 220svh;
+    }
+    html.ulr-intro-css-test #ulr-intro-title,
+    html.ulr-intro-css-test #ulr-intro-outro {
+      inset:0 0 auto !important;
+      height:var(--ulr-intro-stage-h,100lvh) !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-head {
+      animation:ulrIntroCssHead 1s linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0px 220svh;
+    }
+    html.ulr-intro-css-test #ulr-intro-title {
+      animation:ulrIntroCssTitleLife 1s step-end both;
+      animation-timeline:scroll(root block);
+      animation-range:0px 220svh;
+    }
+    html.ulr-intro-css-test #ulr-morph-shell {
+      animation:ulrIntroCssForm 1s linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0px 220svh;
+    }
+    html.ulr-intro-css-test #ulr-mobile-header {
+      animation:ulrIntroCssHeader 1s linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0px 220svh;
+    }
+    html.ulr-intro-css-test #ulr-intro-outro {
+      animation:ulrIntroCssOutro 1s linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0px 220svh;
+    }
+    html.ulr-intro-css-test .ulr-logo-glow {
+      animation:none !important;
+      filter:drop-shadow(0 0 6px rgba(255,102,0,.55)) !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-title > div:first-child {
+      filter:none !important;
+    }
+    html.ulr-intro-css-test #ulr-intro-head div[aria-hidden="true"] {
+      filter:none !important; mix-blend-mode:normal !important; opacity:.42;
+    }
+
     /* masterplan: wider square map; amenity markers → teardrop map pins (clean, high contrast) */
     #ulr-masterplan { padding-left:clamp(10px,3vw,16px) !important; padding-right:clamp(10px,3vw,16px) !important; }
     /* zoom the whole map (image + zones + markers together) to crop the empty forest/road margins */
