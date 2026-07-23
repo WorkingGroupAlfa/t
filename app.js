@@ -41,18 +41,7 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-cms-img]'), function (node) {
       var value = getCms(node.getAttribute('data-cms-img'), null);
-      if (!value) return;
-      node.setAttribute('src', value);
-      var defaultSource = node.getAttribute('data-default-src');
-      var mobileSource = node.getAttribute('data-mobile-src');
-      if (defaultSource && mobileSource && value === defaultSource) {
-        node.setAttribute('srcset', mobileSource + ' 1280w, ' + defaultSource + ' 2560w');
-        node.setAttribute('sizes', '100vw');
-      } else if (mobileSource) {
-        // A CMS replacement must win over the derivative of the original image.
-        node.removeAttribute('srcset');
-        node.removeAttribute('sizes');
-      }
+      if (value) node.setAttribute('src', value);
     });
     var logo = getCms('images.logo', null);
     if (logo) {
@@ -387,15 +376,12 @@
   // HEADER PHRASE
   // ============================================================
   function renderPhrase() {
-    ['ulr-phrase', 'ulr-mobile-phrase'].forEach(function (id) {
-      var span = $(id);
-      if (!span) return;
-      span.textContent = phrases[state.phraseIdx];
-      // replay animation
-      span.style.animation = 'none';
-      void span.offsetWidth;
-      span.style.animation = 'ulrPhraseIn .8s ease both';
-    });
+    var span = $('ulr-phrase');
+    span.textContent = phrases[state.phraseIdx];
+    // replay animation
+    span.style.animation = 'none';
+    void span.offsetWidth;
+    span.style.animation = 'ulrPhraseIn .8s ease both';
   }
 
   // ============================================================
@@ -467,8 +453,6 @@
     var host = $('ulr-quiz-body');
     if (!host) return;
     var step = state.quizStep;
-    var quizPanel = $('ulr-morph-quiz');
-    if (quizPanel) quizPanel.classList.toggle('is-scrollable', step === 2);
 
     if (step === 'done') {
       var first = state.quizName ? state.quizName.split(' ')[0] : '';
@@ -1523,40 +1507,22 @@
   // SCROLL MOTION (hero parallax, zoom blocks, keyhole pin)
   // ============================================================
   var rafPending = false;
-  var zoomMotion = { items: [], fallback: false };
   function onScrollRaf() { if (!rafPending) { rafPending = true; requestAnimationFrame(function () { rafPending = false; onScroll(); }); } }
-
-  function initZoomMotion() {
-    zoomMotion.items = Array.prototype.slice.call(document.querySelectorAll('[data-zoom]'));
-    if (!('IntersectionObserver' in window)) {
-      zoomMotion.fallback = true;
-      zoomMotion.items.forEach(function (elm) { elm._ulrZoomActive = true; });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) { entry.target._ulrZoomActive = entry.isIntersecting; });
-    }, { rootMargin: '18% 0px 18% 0px' });
-    zoomMotion.items.forEach(function (elm) {
-      elm._ulrZoomActive = false;
-      io.observe(elm);
-    });
-  }
 
   function onScroll() {
     var vh = window.innerHeight;
     // The landing screen (quiz form + headline) and the header reveal now live inside
     // the clouds intro — see updateIntro(). No separate hero block here anymore.
-    zoomMotion.items.forEach(function (elm) {
-      if (!elm._ulrZoomActive) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function (elm) {
       var r = elm.getBoundingClientRect();
       var prog = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
       elm.style.transform = 'scale(' + (1.02 + prog * 0.16) + ')';
     });
 
     // keyhole: progress tracks native scroll position (see updateKeyhole / khTick)
-    if (!kh.reduced && kh.fallback) updateKeyhole();
+    if (!kh.reduced) updateKeyhole();
     // intro clouds->homes transition (scroll-driven)
-    if (introMotion.active) updateIntro();
+    updateIntro();
   }
 
   // ============================================================
@@ -1566,7 +1532,7 @@
   // #ulr-keyhole section gives the scroll distance; its sticky #kh-pin stays fixed
   // on screen while p runs 0 -> 1 in lockstep with the scrollbar. Nothing hijacks
   // the scroll, so it stays smooth on wheel / trackpad / touch / keyboard alike.
-  var kh = { reduced: false, running: false, fallback: false, raf: null, lastP: -1 };
+  var kh = { reduced: false, running: false, raf: null, lastP: -1 };
   function smoothstep(x, a, b) {
     if (b === undefined) { b = 1; a = a || 0; }
     var t = (x - a) / (b - a); t = Math.min(1, Math.max(0, t));
@@ -1644,7 +1610,7 @@
         entries.forEach(function (e) { if (e.isIntersecting) khStart(); else khStop(); });
       }, { rootMargin: '20% 0px 20% 0px' }).observe(sec);
     } else {
-      kh.fallback = true;
+      khStart();
     }
   }
 
@@ -1665,228 +1631,82 @@
     }
     return output[output.length - 1];
   }
-
-  var introMotion = {
-    active: true,
-    measured: false,
-    root: null,
-    pin: null,
-    track: null,
-    scaleEl: null,
-    head: null,
-    shell: null,
-    quizPanel: null,
-    headerPanel: null,
-    mobileGhost: null,
-    mobileHeader: null,
-    outro: null,
-    isMobile: null,
-    viewportW: 0,
-    viewportH: 0,
-    rootTop: 0,
-    rootHeight: 0,
-    startW: 0,
-    endW: 0,
-    startH: 0,
-    endH: 58,
-    startTop: 0,
-    endTop: 0,
-    ghostScaleX: 1,
-    ghostScaleY: 1,
-    ghostDeltaY: 0,
-    morphing: false,
-    shellHidden: false,
-    ghostVisible: false
-  };
-
-  function cacheIntroMotionElements() {
-    if (introMotion.root) return true;
-    introMotion.root = $('ulr-intro');
-    if (!introMotion.root) return false;
-    introMotion.pin = $('ulr-intro-pin');
-    introMotion.track = $('ulr-intro-track');
-    introMotion.scaleEl = $('ulr-intro-scale');
-    introMotion.head = $('ulr-intro-head');
-    introMotion.shell = $('ulr-morph-shell');
-    introMotion.quizPanel = $('ulr-morph-quiz');
-    introMotion.headerPanel = $('ulr-morph-header');
-    introMotion.mobileGhost = $('ulr-mobile-morph-ghost');
-    introMotion.mobileHeader = $('ulr-mobile-header');
-    introMotion.outro = $('ulr-intro-outro');
-    return true;
-  }
-
-  // Read all layout metrics together, at startup/real viewport changes only.
-  // On iOS a toolbar reveal fires height-only resizes; mobile svh remains stable, so
-  // those events deliberately reuse the current metrics instead of making the page jump.
-  function measureIntro(force) {
-    if (!cacheIntroMotionElements()) return false;
-    var mobile = state.isMobile;
-    var width = window.innerWidth;
-    if (!force && introMotion.measured && introMotion.isMobile === mobile &&
-      Math.abs(introMotion.viewportW - width) < 2 &&
-      (mobile || Math.abs(introMotion.viewportH - window.innerHeight) < 2)) return true;
-
-    var pinHeight = introMotion.pin ? introMotion.pin.getBoundingClientRect().height : window.innerHeight;
-    var vh = mobile && pinHeight > 0 ? pinHeight : window.innerHeight;
-    var rootRect = introMotion.root.getBoundingClientRect();
-    var pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    var startW = Math.min(820, width * 0.90);
-    var headerPad = Math.max(24, Math.min(52, width * 0.06));
-    var endW = Math.min(1160, width - headerPad);
-    var startH = Math.max(380, Math.min(vh * 0.48, 465));
-    var startGap = Math.max(16, Math.min(vh * 0.022, 26));
-    var startTop = vh - startH - startGap;
-    var endTop = Math.max(10, Math.min(width * 0.018, 18));
-
-    introMotion.measured = true;
-    introMotion.isMobile = mobile;
-    introMotion.viewportW = width;
-    introMotion.viewportH = vh;
-    introMotion.rootTop = rootRect.top + pageY;
-    introMotion.rootHeight = introMotion.root.offsetHeight;
-    introMotion.startW = startW;
-    introMotion.endW = endW;
-    introMotion.startH = startH;
-    introMotion.startTop = startTop;
-    introMotion.endTop = endTop;
-    introMotion.ghostScaleX = endW / startW;
-    introMotion.ghostScaleY = introMotion.endH / startH;
-    introMotion.ghostDeltaY = endTop - startTop;
-
-    if (mobile && introMotion.shell) {
-      introMotion.shell.style.width = startW + 'px';
-      introMotion.shell.style.height = startH + 'px';
-      introMotion.shell.style.top = startTop + 'px';
-      introMotion.shell.style.borderRadius = '24px';
-      introMotion.shell.style.boxShadow = '0 34px 80px -26px rgba(29,37,33,.62)';
-    }
-    if (mobile && introMotion.mobileGhost) {
-      introMotion.mobileGhost.style.width = startW + 'px';
-      introMotion.mobileGhost.style.height = startH + 'px';
-      introMotion.mobileGhost.style.top = startTop + 'px';
-    }
-    if (!mobile) {
-      if (introMotion.shell) {
-        introMotion.shell.style.visibility = 'visible';
-        introMotion.shell.style.opacity = '1';
-        introMotion.shell.classList.remove('is-morphing');
-      }
-      introMotion.shellHidden = false;
-      introMotion.morphing = false;
-    }
-    return true;
-  }
-
-  function initIntroMotion() {
-    if (!measureIntro(true)) return;
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          introMotion.active = entry.isIntersecting;
-          if (entry.isIntersecting) updateIntro();
-        });
-      }, { rootMargin: '25% 0px 25% 0px' }).observe(introMotion.root);
-    }
-  }
-
   // Progress comes straight from the tall #ulr-intro section's scroll position; its
   // sticky child stays pinned while p runs 0->1, panning the camera clouds -> homes.
   function updateIntro() {
-    if (!measureIntro(false)) return;
-    var vh = introMotion.viewportH;
-    var scrollable = introMotion.rootHeight - vh;
+    var root = $('ulr-intro');
+    if (!root) return;
+    var vh = window.innerHeight;
+    var scrollable = root.offsetHeight - vh;
     if (scrollable <= 0) return;
-    var pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    var scrolled = Math.min(Math.max(pageY - introMotion.rootTop, 0), scrollable);
+    var scrolled = Math.min(Math.max(-root.getBoundingClientRect().top, 0), scrollable);
     var p = scrolled / scrollable;
     // Camera pan + scale run across the WHOLE section (clouds -> homes).
     // Phones use a shorter track (255vh vs 280vh, see @media) to trim the empty sky — pan less so the homes still fills the frame.
     var camFactor = state.isMobile ? 1.55 : 1.80;
     var camY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (camFactor * vh);
     var scale = introInterp([0, 0.1, 0.5, 0.92, 1], [1.02, 1.03, 1.05, 1.04, 1.06], p);
-    if (introMotion.track) introMotion.track.style.transform = 'translate3d(0,' + (-camY) + 'px,0)';
-    if (introMotion.scaleEl && !state.isMobile) introMotion.scaleEl.style.transform = 'scale(' + scale + ')';
+    var track = $('ulr-intro-track'), scaleEl = $('ulr-intro-scale');
+    if (track) track.style.transform = 'translateY(' + (-camY) + 'px)';
+    if (scaleEl) scaleEl.style.transform = 'scale(' + scale + ')';
 
     // Overlay transitions are keyed to raw scroll (viewport-heights), so they feel like
     // a normal hero hand-off regardless of section length. The headline clears first.
+    var head = $('ulr-intro-head');
     var headFade = smoothstep(scrolled, vh * 0.05, vh * 0.42);
-    if (introMotion.head) {
-      introMotion.head.style.opacity = String(1 - headFade);
-      introMotion.head.style.transform = 'translate3d(0,' + (headFade * -26) + 'px,0)';
-    }
+    if (head) { head.style.opacity = String(1 - headFade); head.style.transform = 'translateY(' + (headFade * -26) + 'px)'; }
 
-    // Desktop keeps the exact geometry morph. Mobile crossfades three compositor layers:
-    // static quiz card -> transform-only bridge -> already-sized header pill.
+    // One real shell morphs from the bottom quiz card into the sticky header pill.
     var e = Math.min(1, Math.max(0, (scrolled - vh * 0.22) / (vh * 1.05)));  // completes ~1.27 screens in
     var es = e * e * (3 - 2 * e);
-    if (introMotion.shell && state.isMobile) {
-      var cardOpacity = 1 - smoothstep(e, 0.08, 0.36);
-      introMotion.shell.style.opacity = String(cardOpacity);
-      introMotion.shell.style.transform = 'translate3d(-50%,' + (-18 * smoothstep(e, 0.02, 0.34)) + 'px,0) scale(' + (1 - 0.025 * smoothstep(e, 0.02, 0.34)) + ')';
-      introMotion.shell.style.pointerEvents = e < 0.12 ? 'auto' : 'none';
-
-      var isMorphing = e > 0.035;
-      if (isMorphing !== introMotion.morphing) {
-        introMotion.morphing = isMorphing;
-        introMotion.shell.classList.toggle('is-morphing', isMorphing);
-      }
-      var shellHidden = e > 0.48;
-      if (shellHidden !== introMotion.shellHidden) {
-        introMotion.shellHidden = shellHidden;
-        introMotion.shell.style.visibility = shellHidden ? 'hidden' : 'visible';
-      }
-      if (introMotion.quizPanel) {
-        introMotion.quizPanel.style.opacity = '1';
-        introMotion.quizPanel.style.pointerEvents = e < 0.12 ? 'auto' : 'none';
-      }
-
-      if (introMotion.mobileGhost) {
-        var ghostOpacity = smoothstep(e, 0.08, 0.20) * (1 - smoothstep(e, 0.56, 0.80));
-        introMotion.mobileGhost.style.opacity = String(ghostOpacity);
-        introMotion.mobileGhost.style.transform = 'translate3d(-50%,' + (introMotion.ghostDeltaY * es) + 'px,0) scale(' +
-          (1 + (introMotion.ghostScaleX - 1) * es) + ',' + (1 + (introMotion.ghostScaleY - 1) * es) + ')';
-        var ghostVisible = e > 0.055 && e < 0.84;
-        if (ghostVisible !== introMotion.ghostVisible) {
-          introMotion.ghostVisible = ghostVisible;
-          introMotion.mobileGhost.style.visibility = ghostVisible ? 'visible' : 'hidden';
-        }
-      }
-      if (introMotion.mobileHeader) {
-        var mobileHeaderOpacity = smoothstep(e, 0.38, 0.72);
-        introMotion.mobileHeader.style.opacity = String(mobileHeaderOpacity);
-        introMotion.mobileHeader.style.transform = 'translate3d(0,' + (-12 * (1 - mobileHeaderOpacity)) + 'px,0) scale(' + (0.985 + 0.015 * mobileHeaderOpacity) + ')';
-        introMotion.mobileHeader.style.pointerEvents = mobileHeaderOpacity > 0.55 ? 'auto' : 'none';
-      }
-    } else if (introMotion.shell) {
-      var width = introMotion.startW + (introMotion.endW - introMotion.startW) * es;
-      var height = introMotion.startH + (introMotion.endH - introMotion.startH) * es;
-      var top = introMotion.startTop + (introMotion.endTop - introMotion.startTop) * es;
+    var shell = $('ulr-morph-shell');
+    var quizPanel = $('ulr-morph-quiz');
+    var headerPanel = $('ulr-morph-header');
+    if (shell) {
+      var startW = Math.min(820, window.innerWidth * 0.90);
+      var headerPad = Math.max(24, Math.min(52, window.innerWidth * 0.06));
+      var endW = Math.min(1160, window.innerWidth - headerPad);
+      var startH = Math.max(380, Math.min(vh * 0.48, 465));
+      var endH = 58;
+      var startGap = Math.max(16, Math.min(vh * 0.022, 26));  // small breathing room above the bottom edge
+      var startTop = vh - startH - startGap;
+      var endTop = Math.max(10, Math.min(window.innerWidth * 0.018, 18));
+      var width = startW + (endW - startW) * es;
+      var height = startH + (endH - startH) * es;
+      var top = startTop + (endTop - startTop) * es;
       var radius = 24 + (999 - 24) * es;
-      introMotion.shell.style.width = width + 'px';
-      introMotion.shell.style.height = height + 'px';
-      introMotion.shell.style.top = top + 'px';
-      introMotion.shell.style.borderRadius = radius + 'px';
-      introMotion.shell.style.transform = 'translateX(-50%)';
-      introMotion.shell.style.boxShadow = '0 ' + (34 - 16 * es) + 'px ' + (80 - 36 * es) + 'px -' + (26 - 4 * es) + 'px rgba(29,37,33,' + (0.62 + 0.1 * es) + ')';
-      if (introMotion.quizPanel) {
-        var qo = 1 - smoothstep(e, 0.16, 0.5);
-        introMotion.quizPanel.style.opacity = String(qo);
-        introMotion.quizPanel.style.pointerEvents = e < 0.22 ? 'auto' : 'none';
+      shell.style.width = width + 'px';
+      shell.style.height = height + 'px';
+      shell.style.borderRadius = radius + 'px';
+      if (state.isMobile) {
+        // Phones: move the shell with a composited transform (no per-frame `top` layout) and
+        // keep a static shadow — avoids the paint/layout thrash that made the intro scroll stutter.
+        shell.style.top = startTop + 'px';
+        shell.style.transform = 'translateX(-50%) translateY(' + ((endTop - startTop) * es) + 'px)';
+      } else {
+        shell.style.top = top + 'px';
+        shell.style.transform = 'translateX(-50%)';
+        shell.style.boxShadow = '0 ' + (34 - 16 * es) + 'px ' + (80 - 36 * es) + 'px -' + (26 - 4 * es) + 'px rgba(29,37,33,' + (0.62 + 0.1 * es) + ')';
       }
-      if (introMotion.headerPanel) {
+      if (quizPanel) {
+        var qo = 1 - smoothstep(e, 0.16, 0.5);
+        quizPanel.style.opacity = String(qo);
+        quizPanel.style.pointerEvents = e < 0.22 ? 'auto' : 'none';
+      }
+      if (headerPanel) {
         var ho = smoothstep(e, 0.42, 0.82);
-        introMotion.headerPanel.style.opacity = String(ho);
-        introMotion.headerPanel.style.pointerEvents = ho > 0.55 ? 'auto' : 'none';
+        headerPanel.style.opacity = String(ho);
+        headerPanel.style.pointerEvents = ho > 0.55 ? 'auto' : 'none';
       }
     }
 
     // Lifestyle pitch fades in over the homes near the END of the section (p-based,
     // so it tracks the clouds->homes pan rather than the early form hand-off).
-    if (introMotion.outro) {
+    var outro = $('ulr-intro-outro');
+    if (outro) {
       var oo = smoothstep(p, 0.52, 0.72);
-      introMotion.outro.style.opacity = String(oo);
-      introMotion.outro.style.pointerEvents = oo > 0.5 ? 'auto' : 'none';
+      outro.style.opacity = String(oo);
+      outro.style.pointerEvents = oo > 0.5 ? 'auto' : 'none';
     }
   }
 
@@ -2054,15 +1874,13 @@
 
     // reveals + scroll
     initReveals();
-    initZoomMotion();
-    applyResponsive();
-    initIntroMotion();
     window.addEventListener('scroll', onScrollRaf, { passive: true });
     onScroll();
 
     // phrases rotation
     setInterval(function () { state.phraseIdx = (state.phraseIdx + 1) % phrases.length; renderPhrase(); }, 3600);
 
+    applyResponsive();
     initKeyhole();
 
     // autoplay
@@ -2070,19 +1888,13 @@
     homeStartAuto();
 
     // resize
-    var resizeRaf = null;
     window.addEventListener('resize', function () {
-      if (resizeRaf) cancelAnimationFrame(resizeRaf);
-      resizeRaf = requestAnimationFrame(function () {
-        resizeRaf = null;
       var wasMobile = state.isMobile;
       state.isMobile = window.matchMedia('(max-width:760px)').matches;
       applyResponsive();
       if (wasMobile !== state.isMobile) { applyMapConfig(); renderMapStatic(); renderAmenities(); renderReactive(); closeAmenitySheet(); closeAmenityPins(); closeNearbyPanel(); }
       if (!kh.reduced) { kh.lastP = -1; updateKeyhole(); }
-      measureIntro(wasMobile !== state.isMobile);
       updateIntro();
-      });
     });
 
     window.addEventListener('message', function (event) {
