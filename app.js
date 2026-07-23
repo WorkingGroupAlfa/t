@@ -71,6 +71,10 @@
 
   function applyCmsStaticContent() {
     if (!cmsContent) return;
+    var useBakedCssIntro = introCssTest &&
+      getCms('images.introClouds', null) === 'uploads/clouds.webp' &&
+      getCms('images.introHomes', null) === 'uploads/homes.webp';
+    document.documentElement.classList.toggle('ulr-intro-css-baked', useBakedCssIntro);
     if (cmsContent.meta) {
       if (cmsContent.meta.title) document.title = cmsContent.meta.title;
       var desc = document.querySelector('meta[name="description"]');
@@ -90,7 +94,9 @@
       if (!value) return;
       var defaultSrc = node.getAttribute('data-default-src');
       var mobileSrc = node.getAttribute('data-mobile-src');
-      node.setAttribute('srcset', value === defaultSrc && mobileSrc ? mobileSrc : value);
+      var cssMobileSrc = node.getAttribute('data-css-mobile-src');
+      var optimizedMobileSrc = useBakedCssIntro && cssMobileSrc ? cssMobileSrc : mobileSrc;
+      node.setAttribute('srcset', value === defaultSrc && optimizedMobileSrc ? optimizedMobileSrc : value);
     });
     var logo = getCms('images.logo', null);
     if (logo) {
@@ -1600,7 +1606,18 @@
   // SCROLL MOTION (hero parallax, zoom blocks, keyhole pin)
   // ============================================================
   var rafPending = false;
-  function onScrollRaf() { if (!rafPending) { rafPending = true; requestAnimationFrame(function () { rafPending = false; onScroll(); }); } }
+  function onScrollRaf() {
+    // In CSS test mode the compositor owns the entire intro. Avoid even an empty
+    // main-thread animation frame for every Telegram/Safari scroll event.
+    if (introCssTest && state.isMobile && window.pageYOffset < introSectionEnd) return;
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(function () {
+        rafPending = false;
+        onScroll();
+      });
+    }
+  }
 
   function onScroll() {
     var vh = window.innerHeight;
