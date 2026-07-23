@@ -376,12 +376,15 @@
   // HEADER PHRASE
   // ============================================================
   function renderPhrase() {
-    var span = $('ulr-phrase');
-    span.textContent = phrases[state.phraseIdx];
-    // replay animation
-    span.style.animation = 'none';
-    void span.offsetWidth;
-    span.style.animation = 'ulrPhraseIn .8s ease both';
+    ['ulr-phrase', 'ulr-mobile-phrase'].forEach(function (id) {
+      var span = $(id);
+      if (!span) return;
+      span.textContent = phrases[state.phraseIdx];
+      // replay animation
+      span.style.animation = 'none';
+      void span.offsetWidth;
+      span.style.animation = 'ulrPhraseIn .8s ease both';
+    });
   }
 
   // ============================================================
@@ -453,6 +456,8 @@
     var host = $('ulr-quiz-body');
     if (!host) return;
     var step = state.quizStep;
+    var quizPanel = $('ulr-morph-quiz');
+    if (quizPanel) quizPanel.classList.toggle('is-scrollable', step === 2);
 
     if (step === 'done') {
       var first = state.quizName ? state.quizName.split(' ')[0] : '';
@@ -1662,41 +1667,66 @@
     var shell = $('ulr-morph-shell');
     var quizPanel = $('ulr-morph-quiz');
     var headerPanel = $('ulr-morph-header');
+    var mobileHeader = $('ulr-mobile-header');
     if (shell) {
-      var startW = Math.min(820, window.innerWidth * 0.90);
-      var headerPad = Math.max(24, Math.min(52, window.innerWidth * 0.06));
-      var endW = Math.min(1160, window.innerWidth - headerPad);
-      var startH = Math.max(380, Math.min(vh * 0.48, 465));
-      var endH = 58;
-      var startGap = Math.max(16, Math.min(vh * 0.022, 26));  // small breathing room above the bottom edge
-      var startTop = vh - startH - startGap;
-      var endTop = Math.max(10, Math.min(window.innerWidth * 0.018, 18));
-      var width = startW + (endW - startW) * es;
-      var height = startH + (endH - startH) * es;
-      var top = startTop + (endTop - startTop) * es;
-      var radius = 24 + (999 - 24) * es;
-      shell.style.width = width + 'px';
-      shell.style.height = height + 'px';
-      shell.style.borderRadius = radius + 'px';
       if (state.isMobile) {
-        // Phones: move the shell with a composited transform (no per-frame `top` layout) and
-        // keep a static shadow — avoids the paint/layout thrash that made the intro scroll stutter.
-        shell.style.top = startTop + 'px';
-        shell.style.transform = 'translateX(-50%) translateY(' + ((endTop - startTop) * es) + 'px)';
+        // Phones deliberately avoid the geometry morph. The large form and the already
+        // sized header only cross-fade, so Safari never lays out/resizes the card on scroll.
+        var formOpacity = 1 - smoothstep(e, 0.02, 0.30);
+        var mobileHeaderOpacity = smoothstep(e, 0.34, 0.58);
+        shell.style.opacity = String(formOpacity);
+        shell.style.visibility = formOpacity > 0.001 ? 'visible' : 'hidden';
+        shell.style.pointerEvents = e < 0.12 ? 'auto' : 'none';
+        shell.classList.toggle('is-fading', e > 0.02);
+        if (quizPanel) {
+          quizPanel.style.opacity = '1';
+          quizPanel.style.pointerEvents = e < 0.12 ? 'auto' : 'none';
+        }
+        if (headerPanel) {
+          headerPanel.style.opacity = '0';
+          headerPanel.style.pointerEvents = 'none';
+        }
+        if (mobileHeader) {
+          mobileHeader.style.opacity = String(mobileHeaderOpacity);
+          mobileHeader.style.pointerEvents = mobileHeaderOpacity > 0.55 ? 'auto' : 'none';
+        }
       } else {
+        var startW = Math.min(820, window.innerWidth * 0.90);
+        var headerPad = Math.max(24, Math.min(52, window.innerWidth * 0.06));
+        var endW = Math.min(1160, window.innerWidth - headerPad);
+        var startH = Math.max(380, Math.min(vh * 0.48, 465));
+        var endH = 58;
+        var startGap = Math.max(16, Math.min(vh * 0.022, 26));  // small breathing room above the bottom edge
+        var startTop = vh - startH - startGap;
+        var endTop = Math.max(10, Math.min(window.innerWidth * 0.018, 18));
+        var width = startW + (endW - startW) * es;
+        var height = startH + (endH - startH) * es;
+        var top = startTop + (endTop - startTop) * es;
+        var radius = 24 + (999 - 24) * es;
+        shell.style.visibility = 'visible';
+        shell.style.opacity = '1';
+        shell.style.pointerEvents = 'auto';
+        shell.classList.remove('is-fading');
+        shell.style.width = width + 'px';
+        shell.style.height = height + 'px';
+        shell.style.borderRadius = radius + 'px';
         shell.style.top = top + 'px';
         shell.style.transform = 'translateX(-50%)';
         shell.style.boxShadow = '0 ' + (34 - 16 * es) + 'px ' + (80 - 36 * es) + 'px -' + (26 - 4 * es) + 'px rgba(29,37,33,' + (0.62 + 0.1 * es) + ')';
-      }
-      if (quizPanel) {
-        var qo = 1 - smoothstep(e, 0.16, 0.5);
-        quizPanel.style.opacity = String(qo);
-        quizPanel.style.pointerEvents = e < 0.22 ? 'auto' : 'none';
-      }
-      if (headerPanel) {
-        var ho = smoothstep(e, 0.42, 0.82);
-        headerPanel.style.opacity = String(ho);
-        headerPanel.style.pointerEvents = ho > 0.55 ? 'auto' : 'none';
+        if (quizPanel) {
+          var qo = 1 - smoothstep(e, 0.16, 0.5);
+          quizPanel.style.opacity = String(qo);
+          quizPanel.style.pointerEvents = e < 0.22 ? 'auto' : 'none';
+        }
+        if (headerPanel) {
+          var ho = smoothstep(e, 0.42, 0.82);
+          headerPanel.style.opacity = String(ho);
+          headerPanel.style.pointerEvents = ho > 0.55 ? 'auto' : 'none';
+        }
+        if (mobileHeader) {
+          mobileHeader.style.opacity = '0';
+          mobileHeader.style.pointerEvents = 'none';
+        }
       }
     }
 
