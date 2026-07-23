@@ -13,15 +13,29 @@
   }
   function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
-  var introFadeTest = new URLSearchParams(window.location.search).get('introTest') === 'fade';
+  var introTestMode = new URLSearchParams(window.location.search).get('introTest') || '';
+  var introFadeTest = introTestMode === 'fade';
+  var introPanTest = introTestMode === 'pan';
   var introSectionEnd = 0;
+  var introMetrics = { top: 0, height: 0, viewportHeight: 0 };
   if (introFadeTest) document.documentElement.classList.add('ulr-intro-fade-test');
+  if (introPanTest) document.documentElement.classList.add('ulr-intro-pan-test');
   function measureIntroSectionEnd() {
     var intro = $('ulr-intro');
-    introSectionEnd = intro ? intro.offsetTop + intro.offsetHeight : 0;
+    if (!intro) {
+      introSectionEnd = 0;
+      introMetrics = { top: 0, height: 0, viewportHeight: 0 };
+      return;
+    }
+    var pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    var pin = $('ulr-intro-pin');
+    introMetrics.top = intro.getBoundingClientRect().top + pageY;
+    introMetrics.height = intro.offsetHeight;
+    introMetrics.viewportHeight = pin ? pin.getBoundingClientRect().height : window.innerHeight;
+    introSectionEnd = introMetrics.top + introMetrics.height;
   }
-  function fadeTestIntroActive() {
-    return introFadeTest && state.isMobile && window.pageYOffset < introSectionEnd;
+  function introTestActive() {
+    return (introFadeTest || introPanTest) && state.isMobile && window.pageYOffset < introSectionEnd;
   }
   var cmsContent = null;
   var cmsFingerprint = '';
@@ -662,7 +676,7 @@
   }
   function revNext() { revGo(state.revIdx + 1); }
   function revPrev() { revGo(state.revIdx - 1); }
-  function revStartAuto() { revStopAuto(); revAuto = setInterval(function () { if (!state.revPaused && !document.hidden && !fadeTestIntroActive()) revNext(); }, 8500); }
+  function revStartAuto() { revStopAuto(); revAuto = setInterval(function () { if (!state.revPaused && !document.hidden && !introTestActive()) revNext(); }, 8500); }
   function revStopAuto() { if (revAuto) { clearInterval(revAuto); revAuto = null; } }
 
   // ============================================================
@@ -887,7 +901,7 @@
   }
   function homeNext() { homeGo(state.homeIdx + 1); }
   function homePrev() { homeGo(state.homeIdx - 1); }
-  function homeStartAuto() { homeStopAuto(); homeAuto = setInterval(function () { if (!state.homePaused && !state.planModalOpen && !document.hidden && !fadeTestIntroActive()) homeNext(); }, 8000); }
+  function homeStartAuto() { homeStopAuto(); homeAuto = setInterval(function () { if (!state.homePaused && !state.planModalOpen && !document.hidden && !introTestActive()) homeNext(); }, 8000); }
   function homeStopAuto() { if (homeAuto) { clearInterval(homeAuto); homeAuto = null; } }
   function homeRestartAuto() { homeStartAuto(); }
 
@@ -1515,7 +1529,17 @@
       if (r.top < window.innerHeight * 0.92) reveal(elm); else io.observe(elm);
     });
     clearTimeout(safetyT);
-    safetyT = setTimeout(function () { Array.prototype.forEach.call(document.querySelectorAll('[data-reveal]'), reveal); }, 4000);
+    function revealSafetyFallback() {
+      // Revealing every off-screen section at once causes a visible hitch around the
+      // fourth second of the mobile intro. IntersectionObserver remains active; defer
+      // this fallback until the optimized intro has left the viewport.
+      if (introTestActive()) {
+        safetyT = setTimeout(revealSafetyFallback, 2500);
+        return;
+      }
+      Array.prototype.forEach.call(document.querySelectorAll('[data-reveal]'), reveal);
+    }
+    safetyT = setTimeout(revealSafetyFallback, 4000);
   }
 
   // ============================================================
@@ -1526,10 +1550,10 @@
 
   function onScroll() {
     var vh = window.innerHeight;
-    var fadeIntroActive = fadeTestIntroActive();
+    var optimizedIntroActive = introTestActive();
     // The landing screen (quiz form + headline) and the header reveal now live inside
     // the clouds intro — see updateIntro(). No separate hero block here anymore.
-    if (!fadeIntroActive) {
+    if (!optimizedIntroActive) {
       Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function (elm) {
         var r = elm.getBoundingClientRect();
         var prog = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
@@ -1538,7 +1562,7 @@
     }
 
     // keyhole: progress tracks native scroll position (see updateKeyhole / khTick)
-    if (!kh.reduced && !fadeIntroActive) updateKeyhole();
+    if (!kh.reduced && !optimizedIntroActive) updateKeyhole();
     // intro clouds->homes transition (scroll-driven)
     updateIntro();
   }
@@ -1654,14 +1678,23 @@
   function updateIntro() {
     var root = $('ulr-intro');
     if (!root) return;
-    var vh = window.innerHeight;
-    var scrollable = root.offsetHeight - vh;
+    var optimizedTest = (introFadeTest || introPanTest) && state.isMobile;
+    var vh = optimizedTest && introMetrics.viewportHeight ? introMetrics.viewportHeight : window.innerHeight;
+    var rootHeight = optimizedTest && introMetrics.height ? introMetrics.height : root.offsetHeight;
+    var scrollable = rootHeight - vh;
     if (scrollable <= 0) return;
-    var scrolled = Math.min(Math.max(-root.getBoundingClientRect().top, 0), scrollable);
+    var scrolled;
+    if (optimizedTest) {
+      var pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      scrolled = Math.min(Math.max(pageY - introMetrics.top, 0), scrollable);
+    } else {
+      scrolled = Math.min(Math.max(-root.getBoundingClientRect().top, 0), scrollable);
+    }
     var p = scrolled / scrollable;
     var track = $('ulr-intro-track'), scaleEl = $('ulr-intro-scale');
     var clouds = $('ulr-intro-clouds'), homesBackground = $('ulr-intro-homes');
     var fadeBackground = introFadeTest && state.isMobile;
+    var panBackground = introPanTest && state.isMobile;
     if (fadeBackground) {
       // Test mode: two already-sized layers cross-fade. No moving 255vh surface,
       // parent zoom or live image masks are involved.
@@ -1670,6 +1703,14 @@
       if (scaleEl) scaleEl.style.transform = 'none';
       if (clouds) clouds.style.opacity = String(1 - homesOpacity);
       if (homesBackground) homesBackground.style.opacity = String(homesOpacity);
+    } else if (panBackground) {
+      // Optimized camera path: only one isolated track moves on the compositor.
+      // Gradient overlays replace the two live masks; the parent never scales.
+      var panY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (1.55 * vh);
+      if (track) track.style.transform = 'translate3d(0,' + (-panY) + 'px,0)';
+      if (scaleEl) scaleEl.style.transform = 'none';
+      if (clouds) clouds.style.opacity = '1';
+      if (homesBackground) homesBackground.style.opacity = '1';
     } else {
       // Default camera pan + scale across the whole section.
       var camFactor = state.isMobile ? 1.55 : 1.80;
@@ -1936,7 +1977,7 @@
 
     // phrases rotation
     setInterval(function () {
-      if (fadeTestIntroActive()) return;
+      if (introTestActive()) return;
       state.phraseIdx = (state.phraseIdx + 1) % phrases.length;
       renderPhrase();
     }, 3600);

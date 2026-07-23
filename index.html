@@ -108,6 +108,29 @@
     html.ulr-intro-fade-test #ulr-intro-clouds { z-index:1; opacity:1; }
     html.ulr-intro-fade-test #ulr-intro-homes { z-index:2; opacity:0; }
 
+    /* Hidden A/B mode: /?introTest=pan. Preserve the original clouds-to-homes
+       camera path, but move one isolated track only (no masks or parent zoom). */
+    html.ulr-intro-pan-test #ulr-intro { height:320svh !important; }
+    html.ulr-intro-pan-test #ulr-intro-pin { height:100svh !important; }
+    html.ulr-intro-pan-test #ulr-intro-scale {
+      transform:none !important; will-change:auto !important;
+      z-index:0; isolation:isolate;
+    }
+    html.ulr-intro-pan-test #ulr-intro-track {
+      height:255svh !important; will-change:transform !important;
+      backface-visibility:hidden;
+    }
+    html.ulr-intro-pan-test #ulr-intro-clouds,
+    html.ulr-intro-pan-test #ulr-intro-homes {
+      width:100% !important; height:120svh !important;
+      -webkit-mask-image:none !important; mask-image:none !important;
+      backface-visibility:hidden;
+    }
+    html.ulr-intro-pan-test #ulr-intro-clouds { top:0 !important; }
+    html.ulr-intro-pan-test #ulr-intro-homes { top:135svh !important; }
+    html.ulr-intro-pan-test #ulr-intro-cloud-fade,
+    html.ulr-intro-pan-test #ulr-intro-homes-fade { display:block !important; }
+
     /* masterplan: wider square map; amenity markers → teardrop map pins (clean, high contrast) */
     #ulr-masterplan { padding-left:clamp(10px,3vw,16px) !important; padding-right:clamp(10px,3vw,16px) !important; }
     /* zoom the whole map (image + zones + markers together) to crop the empty forest/road margins */
@@ -218,7 +241,9 @@
       <div id="ulr-intro-scale" style="position:absolute; inset:0; transform-origin:50% 50%; will-change:transform;">
         <div id="ulr-intro-track" style="position:absolute; left:0; top:0; width:100%; height:280vh; will-change:transform; background:linear-gradient(180deg, #88a6c8 0%, #92afd0 28%, #abc2df 44%, #c9d6ea 56%, #e3e8f7 66%, #e3e8f7 100%);">
           <img id="ulr-intro-clouds" data-cms-img="images.introClouds" src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
+          <div id="ulr-intro-cloud-fade" aria-hidden="true" style="display:none; position:absolute; left:0; right:0; top:86svh; height:34svh; background:linear-gradient(180deg,rgba(172,195,223,0) 0%,#acc3df 76%,#b3c7e2 100%); pointer-events:none;"></div>
           <img id="ulr-intro-homes" data-cms-img="images.introHomes" src="uploads/homes.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
+          <div id="ulr-intro-homes-fade" aria-hidden="true" style="display:none; position:absolute; left:0; right:0; top:135svh; height:17svh; background:linear-gradient(180deg,#c1d1e7 0%,rgba(193,209,231,0) 78%); pointer-events:none;"></div>
         </div>
       </div>
 
