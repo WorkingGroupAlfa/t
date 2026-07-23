@@ -109,27 +109,56 @@
     html.ulr-intro-fade-test #ulr-intro-homes { z-index:2; opacity:0; }
 
     /* Hidden A/B mode: /?introTest=pan. Preserve the original clouds-to-homes
-       camera path, but move one isolated track only (no masks or parent zoom). */
-    html.ulr-intro-pan-test #ulr-intro { height:320svh !important; }
-    html.ulr-intro-pan-test #ulr-intro-pin { height:100svh !important; }
+       path while moving only small visual layers (no tall track, masks or zoom). */
+    html.ulr-intro-pan-test #ulr-intro {
+      height:calc(220svh + max(100vh, 100lvh, 100dvh)) !important;
+    }
+    html.ulr-intro-pan-test #ulr-intro-pin {
+      height:max(100vh, 100lvh, 100dvh) !important;
+      overflow:hidden !important;
+      background:transparent !important;
+    }
     html.ulr-intro-pan-test #ulr-intro-scale {
+      inset:0 0 auto !important;
+      height:max(100vh, 100lvh, 100dvh);
       transform:none !important; will-change:auto !important;
-      z-index:0; isolation:isolate;
+      overflow:hidden; contain:paint; z-index:0;
+      background:#b9cae1;
     }
     html.ulr-intro-pan-test #ulr-intro-track {
-      height:255svh !important; will-change:transform !important;
-      backface-visibility:hidden;
+      inset:0 !important; height:100% !important;
+      transform:none !important; will-change:auto !important;
+      background:none !important;
     }
     html.ulr-intro-pan-test #ulr-intro-clouds,
     html.ulr-intro-pan-test #ulr-intro-homes {
-      width:100% !important; height:120svh !important;
+      width:100% !important;
       -webkit-mask-image:none !important; mask-image:none !important;
+      will-change:transform; backface-visibility:hidden;
+    }
+    html.ulr-intro-pan-test #ulr-intro-clouds {
+      top:0 !important; height:120% !important;
+    }
+    html.ulr-intro-pan-test #ulr-intro-homes {
+      top:135% !important; height:125% !important;
+    }
+    html.ulr-intro-pan-test #ulr-intro-cloud-fade,
+    html.ulr-intro-pan-test #ulr-intro-homes-fade {
+      display:block !important; will-change:transform;
       backface-visibility:hidden;
     }
-    html.ulr-intro-pan-test #ulr-intro-clouds { top:0 !important; }
-    html.ulr-intro-pan-test #ulr-intro-homes { top:135svh !important; }
-    html.ulr-intro-pan-test #ulr-intro-cloud-fade,
-    html.ulr-intro-pan-test #ulr-intro-homes-fade { display:block !important; }
+    html.ulr-intro-pan-test #ulr-intro-cloud-fade {
+      top:86% !important; height:49% !important;
+      background:linear-gradient(180deg,rgba(172,195,223,0) 0%,#acc3df 53%,#b3c7e2 70%,#c1d1e7 100%) !important;
+    }
+    html.ulr-intro-pan-test #ulr-intro-homes-fade {
+      top:calc(135% - 3px) !important; height:calc(17% + 3px) !important;
+    }
+    html.ulr-intro-pan-test #ulr-intro-title,
+    html.ulr-intro-pan-test #ulr-intro-outro {
+      inset:0 0 auto !important;
+      height:max(100vh, 100lvh, 100dvh);
+    }
 
     /* masterplan: wider square map; amenity markers → teardrop map pins (clean, high contrast) */
     #ulr-masterplan { padding-left:clamp(10px,3vw,16px) !important; padding-right:clamp(10px,3vw,16px) !important; }
@@ -240,9 +269,15 @@
     <div id="ulr-intro-pin" style="position:sticky; top:0; height:100vh; overflow:hidden; background:#9fb9d3;">
       <div id="ulr-intro-scale" style="position:absolute; inset:0; transform-origin:50% 50%; will-change:transform;">
         <div id="ulr-intro-track" style="position:absolute; left:0; top:0; width:100%; height:280vh; will-change:transform; background:linear-gradient(180deg, #88a6c8 0%, #92afd0 28%, #abc2df 44%, #c9d6ea 56%, #e3e8f7 66%, #e3e8f7 100%);">
-          <img id="ulr-intro-clouds" data-cms-img="images.introClouds" src="uploads/clouds.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
+          <picture>
+            <source data-cms-source="images.introClouds" data-default-src="uploads/clouds.webp" data-mobile-src="uploads/clouds-mobile.jpg" media="(max-width:760px) and (orientation:portrait)" srcset="uploads/clouds-mobile.jpg">
+            <img id="ulr-intro-clouds" data-cms-img="images.introClouds" src="uploads/clouds.webp" fetchpriority="high" decoding="async" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:0; width:100%; height:120vh; object-fit:cover; object-position:center top; display:block; -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%); mask-image:linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0) 93%);">
+          </picture>
           <div id="ulr-intro-cloud-fade" aria-hidden="true" style="display:none; position:absolute; left:0; right:0; top:86svh; height:34svh; background:linear-gradient(180deg,rgba(172,195,223,0) 0%,#acc3df 76%,#b3c7e2 100%); pointer-events:none;"></div>
-          <img id="ulr-intro-homes" data-cms-img="images.introHomes" src="uploads/homes.webp" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
+          <picture>
+            <source data-cms-source="images.introHomes" data-default-src="uploads/homes.webp" data-mobile-src="uploads/homes-mobile.jpg" media="(max-width:760px) and (orientation:portrait)" srcset="uploads/homes-mobile.jpg">
+            <img id="ulr-intro-homes" data-cms-img="images.introHomes" src="uploads/homes.webp" fetchpriority="high" decoding="async" alt="" onerror="this.style.display='none'" style="position:absolute; left:0; top:160vh; width:100%; height:120vh; object-fit:cover; object-position:center bottom; display:block; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%); mask-image:linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 11%);">
+          </picture>
           <div id="ulr-intro-homes-fade" aria-hidden="true" style="display:none; position:absolute; left:0; right:0; top:135svh; height:17svh; background:linear-gradient(180deg,#c1d1e7 0%,rgba(193,209,231,0) 78%); pointer-events:none;"></div>
         </div>
       </div>
@@ -302,7 +337,7 @@
   <section id="ulr-keyhole" data-screen-label="Ownership reveal" style="position:relative; height:250svh; background:#1d2a25;">
     <div id="kh-pin" style="position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden;">
     <div id="kh-stage" style="position:absolute; inset:0; overflow:hidden; background:#1d2a25; --kh-s:9;">
-      <img id="kh-ext" data-cms-img="images.keyholeExterior" src="uploads/exterior21.webp" alt="Exterior of a home at United Lifestyle Resort" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+      <img id="kh-ext" data-cms-img="images.keyholeExterior" src="uploads/exterior21.webp" loading="lazy" decoding="async" fetchpriority="low" alt="Exterior of a home at United Lifestyle Resort" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
       <div id="kh-ext-scrim" style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(29,42,37,.5) 0%, rgba(29,42,37,.14) 32%, rgba(29,42,37,.5) 100%);"></div>
       <div id="kh-ring" style="display:none; position:absolute; inset:0; pointer-events:none; opacity:0; background:#FF6600; filter:blur(7px); -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc((var(--kh-s) + 1.8)*1vw) auto; mask-size:calc((var(--kh-s) + 1.8)*1vw) auto;"></div>
       <img id="kh-int" data-cms-img="images.keyholeInterior" src="uploads/interior-pc2.webp" alt="Warm interior living space" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; will-change:opacity; -webkit-mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22b%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation=%221%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter=%22url%28%23b%29%22%20fill=%22white%22%3E%3Ccircle%20cx=%2250%22%20cy=%2260%22%20r=%2230%22/%3E%3Cpath%20d=%22M42%2082%20L58%2082%20L66%20146%20L34%20146%20Z%22/%3E%3C/g%3E%3C/svg%3E'); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:calc(var(--kh-s)*1vw) auto; mask-size:calc(var(--kh-s)*1vw) auto;">

@@ -17,21 +17,23 @@
   var introFadeTest = introTestMode === 'fade';
   var introPanTest = introTestMode === 'pan';
   var introSectionEnd = 0;
-  var introMetrics = { top: 0, height: 0, viewportHeight: 0 };
+  var introMetrics = { top: 0, height: 0, pinHeight: 0, viewportHeight: 0 };
   if (introFadeTest) document.documentElement.classList.add('ulr-intro-fade-test');
   if (introPanTest) document.documentElement.classList.add('ulr-intro-pan-test');
   function measureIntroSectionEnd() {
     var intro = $('ulr-intro');
     if (!intro) {
       introSectionEnd = 0;
-      introMetrics = { top: 0, height: 0, viewportHeight: 0 };
+      introMetrics = { top: 0, height: 0, pinHeight: 0, viewportHeight: 0 };
       return;
     }
     var pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
     var pin = $('ulr-intro-pin');
+    var scene = introPanTest && state.isMobile ? $('ulr-intro-scale') : pin;
     introMetrics.top = intro.getBoundingClientRect().top + pageY;
     introMetrics.height = intro.offsetHeight;
-    introMetrics.viewportHeight = pin ? pin.getBoundingClientRect().height : window.innerHeight;
+    introMetrics.pinHeight = pin ? pin.getBoundingClientRect().height : window.innerHeight;
+    introMetrics.viewportHeight = scene ? scene.getBoundingClientRect().height : introMetrics.pinHeight;
     introSectionEnd = introMetrics.top + introMetrics.height;
   }
   function introTestActive() {
@@ -66,6 +68,13 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-cms-img]'), function (node) {
       var value = getCms(node.getAttribute('data-cms-img'), null);
       if (value) node.setAttribute('src', value);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cms-source]'), function (node) {
+      var value = getCms(node.getAttribute('data-cms-source'), null);
+      if (!value) return;
+      var defaultSrc = node.getAttribute('data-default-src');
+      var mobileSrc = node.getAttribute('data-mobile-src');
+      node.setAttribute('srcset', value === defaultSrc && mobileSrc ? mobileSrc : value);
     });
     var logo = getCms('images.logo', null);
     if (logo) {
@@ -721,6 +730,8 @@
   // HOME OPTIONS SLIDER
   // ============================================================
   var homeAuto = null;
+  var homeAssetsReady = false;
+  var homeAssetsObserver = null;
   var planModalBodyOverflow = '';
   function setupPlanLayer(img, h, i, variant) {
     img.src = h.plan;
@@ -767,6 +778,7 @@
   function ensureHomePlanImages() { ensurePlanStage('ulr-home-plan-stage', 'thumb'); }
   function ensurePlanModalImages() { ensurePlanStage('ulr-plan-modal-stage', 'modal'); }
   function renderHomePlan(hIdx) {
+    if (!homeAssetsReady) return;
     ensureHomePlanImages();
     renderPlanStage('ulr-home-plan-stage', hIdx);
   }
@@ -783,6 +795,7 @@
   function openPlanModal() {
     var modal = $('ulr-plan-modal');
     if (!modal) return;
+    enableHomeAssets();
     state.planModalOpen = true;
     planModalBodyOverflow = document.body.style.overflow || '';
     document.body.style.overflow = 'hidden';
@@ -808,6 +821,9 @@
       homes.forEach(function (h) {
         var img = document.createElement('img');
         img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.fetchPriority = 'low';
         img.dataset.desk = h.img;
         img.dataset.phone = h.imgPhone || h.img;
         img.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transform:scale(1.0); transition:opacity .9s ease, transform 9s ease-out; z-index:1;';
@@ -819,11 +835,33 @@
     Array.prototype.forEach.call(host.children, function (img, i) {
       // pick the phone or desktop photo for the current device (swaps on resize across the breakpoint)
       var want = state.isMobile ? img.dataset.phone : img.dataset.desk;
-      if (img.getAttribute('src') !== want) img.src = want;
+      if (homeAssetsReady && img.getAttribute('src') !== want) img.src = want;
       img.style.opacity = i === hIdx ? 1 : 0;
       img.style.transform = i === hIdx ? 'scale(1.1)' : 'scale(1.0)';
       img.style.zIndex = i === hIdx ? 2 : 1;
     });
+  }
+  function enableHomeAssets() {
+    if (homeAssetsReady) return;
+    homeAssetsReady = true;
+    if (homeAssetsObserver) {
+      homeAssetsObserver.disconnect();
+      homeAssetsObserver = null;
+    }
+    renderHomeImages();
+    var hIdx = ((state.homeIdx % homes.length) + homes.length) % homes.length;
+    renderHomePlan(hIdx);
+  }
+  function initDeferredHomeAssets() {
+    var section = $('ulr-homes');
+    if (!section || !('IntersectionObserver' in window)) {
+      enableHomeAssets();
+      return;
+    }
+    homeAssetsObserver = new IntersectionObserver(function (entries) {
+      if (entries.some(function (entry) { return entry.isIntersecting; })) enableHomeAssets();
+    }, { rootMargin: '120% 0px' });
+    homeAssetsObserver.observe(section);
   }
   function renderHomePanel() {
     var hIdx = ((state.homeIdx % homes.length) + homes.length) % homes.length;
@@ -1681,7 +1719,8 @@
     var optimizedTest = (introFadeTest || introPanTest) && state.isMobile;
     var vh = optimizedTest && introMetrics.viewportHeight ? introMetrics.viewportHeight : window.innerHeight;
     var rootHeight = optimizedTest && introMetrics.height ? introMetrics.height : root.offsetHeight;
-    var scrollable = rootHeight - vh;
+    var pinHeight = optimizedTest && introMetrics.pinHeight ? introMetrics.pinHeight : vh;
+    var scrollable = rootHeight - pinHeight;
     if (scrollable <= 0) return;
     var scrolled;
     if (optimizedTest) {
@@ -1693,6 +1732,7 @@
     var p = scrolled / scrollable;
     var track = $('ulr-intro-track'), scaleEl = $('ulr-intro-scale');
     var clouds = $('ulr-intro-clouds'), homesBackground = $('ulr-intro-homes');
+    var cloudFade = $('ulr-intro-cloud-fade'), homesFade = $('ulr-intro-homes-fade');
     var fadeBackground = introFadeTest && state.isMobile;
     var panBackground = introPanTest && state.isMobile;
     if (fadeBackground) {
@@ -1704,13 +1744,15 @@
       if (clouds) clouds.style.opacity = String(1 - homesOpacity);
       if (homesBackground) homesBackground.style.opacity = String(homesOpacity);
     } else if (panBackground) {
-      // Optimized camera path: only one isolated track moves on the compositor.
-      // Gradient overlays replace the two live masks; the parent never scales.
+      // Keep the scene itself still. Moving the old 255vh track forced Safari to
+      // allocate one very tall texture; four smaller layers are much cheaper and
+      // cannot expose the track edge when the browser toolbar changes the viewport.
       var panY = introInterp([0, 0.06, 0.96, 1], [0, 0, 1, 1], p) * (1.55 * vh);
-      if (track) track.style.transform = 'translate3d(0,' + (-panY) + 'px,0)';
-      if (scaleEl) scaleEl.style.transform = 'none';
-      if (clouds) clouds.style.opacity = '1';
-      if (homesBackground) homesBackground.style.opacity = '1';
+      var panTransform = 'translate3d(0,' + (-panY) + 'px,0)';
+      if (clouds) clouds.style.transform = panTransform;
+      if (cloudFade) cloudFade.style.transform = panTransform;
+      if (homesBackground) homesBackground.style.transform = panTransform;
+      if (homesFade) homesFade.style.transform = panTransform;
     } else {
       // Default camera pan + scale across the whole section.
       var camFactor = state.isMobile ? 1.55 : 1.80;
@@ -1720,6 +1762,10 @@
       if (scaleEl) scaleEl.style.transform = 'scale(' + scale + ')';
       if (clouds) clouds.style.opacity = '1';
       if (homesBackground) homesBackground.style.opacity = '1';
+      if (clouds && clouds.style.transform) clouds.style.transform = '';
+      if (cloudFade && cloudFade.style.transform) cloudFade.style.transform = '';
+      if (homesBackground && homesBackground.style.transform) homesBackground.style.transform = '';
+      if (homesFade && homesFade.style.transform) homesFade.style.transform = '';
     }
 
     // Overlay transitions are keyed to raw scroll (viewport-heights), so they feel like
@@ -1886,6 +1932,7 @@
 
     // reactive
     renderReactive();
+    initDeferredHomeAssets();
 
     // hero scroll/header wiring
     Array.prototype.forEach.call(document.querySelectorAll('[data-scroll]'), function (b) {
@@ -1990,15 +2037,27 @@
     homeStartAuto();
 
     // resize
+    var lastLayoutWidth = window.innerWidth;
+    var resizeRaf = null;
     window.addEventListener('resize', function () {
-      var wasMobile = state.isMobile;
-      state.isMobile = window.matchMedia('(max-width:760px)').matches;
-      applyResponsive();
-      if (wasMobile !== state.isMobile) { applyMapConfig(); renderMapStatic(); renderAmenities(); renderReactive(); closeAmenitySheet(); closeAmenityPins(); closeNearbyPanel(); }
-      measureIntroSectionEnd();
-      if (!kh.reduced) { kh.lastP = -1; updateKeyhole(); }
-      updateIntro();
-    });
+      var nextWidth = window.innerWidth;
+      // Safari emits a stream of height-only resize events while its address bar
+      // collapses. The pan scene uses the stable large viewport and needs no work;
+      // rebuilding distant sections here was a major source of scroll hitches.
+      if (state.isMobile && Math.abs(nextWidth - lastLayoutWidth) < 2) return;
+      lastLayoutWidth = nextWidth;
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(function () {
+        resizeRaf = null;
+        var wasMobile = state.isMobile;
+        state.isMobile = window.matchMedia('(max-width:760px)').matches;
+        applyResponsive();
+        if (wasMobile !== state.isMobile) { applyMapConfig(); renderMapStatic(); renderAmenities(); renderReactive(); closeAmenitySheet(); closeAmenityPins(); closeNearbyPanel(); }
+        measureIntroSectionEnd();
+        if (!kh.reduced && !introTestActive()) { kh.lastP = -1; updateKeyhole(); }
+        updateIntro();
+      });
+    }, { passive: true });
 
     window.addEventListener('message', function (event) {
       if (event.origin !== window.location.origin) return;
