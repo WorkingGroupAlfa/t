@@ -160,8 +160,8 @@
       height:max(100vh, 100lvh, 100dvh);
     }
 
-    /* Hidden A/B mode: /?introTest=css. Safari 26.4+ can resolve these
-       root scroll-timeline transforms on its scrolling thread, without JS per frame. */
+    /* Production phone intro (also forced by /?introTest=css). Modern WebKit can
+       resolve these root scroll-timeline transforms without JS per frame. */
     @keyframes ulrIntroCssPan {
       0%, 6% {
         transform:translate3d(0,0,0);

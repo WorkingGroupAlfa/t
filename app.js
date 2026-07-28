@@ -15,7 +15,9 @@
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
   var introTestMode = new URLSearchParams(window.location.search).get('introTest') || '';
   var introFadeTest = introTestMode === 'fade';
-  var introCssRequested = introTestMode === 'css';
+  // The optimized compositor-only intro is the production mobile experience.
+  // Keeping the query modes makes it possible to compare legacy variants safely.
+  var introCssRequested = introTestMode === '' || introTestMode === 'css';
   var introCssSupported = introCssRequested && typeof CSS !== 'undefined' &&
     CSS.supports('animation-timeline', 'view()');
   var introCssTest = introCssRequested && introCssSupported;
